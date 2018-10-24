@@ -1,0 +1,146 @@
+body {
+  padding: 0px;
+  height: 100%;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image: url('../images/bg.jpg');
+  background-size: 100%;
+  background-color: #3333;
+  min-height: 600px;
+}
+
+body h3, body .mdl-layout__header-row .mdl-navigation__link,
+body header .mdl-layout-title, 
+body .mdl-layout__drawer-button i{
+  color : white;
+}
+
+main.mdl-layout__content{
+  padding-bottom: 50px;
+}
+
+a {
+  color: #00B7FF;
+}
+
+
+footer.mdl-mini-footer{
+  bottom: 0;
+  position: fixed;
+  padding: 16px 20px;
+  width: 100%;
+  z-index: 1000; 
+}
+
+.m8{
+  margin:8px;
+}
+
+.m4{
+  margin:4px;
+}
+
+.hidden-gone{
+  visibility: hidden;
+}
+
+form{
+  margin: 20px;
+
+}
+
+.giveMeEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* number of lines to show */
+  line-height: 16px;        /* fallback */
+  max-height: 60px;       /* fallback */
+}
+
+.overflow-scroll{
+  overflow-y: scroll;
+}
+
+tr.mdl-grid,tr.mdl-grid td div{
+  margin:0px;
+  padding:0px;
+}
+
+div.border-rc{
+  border: 1px solid rebeccapurple;
+  border-radius: 4px;
+  padding: 10px;
+
+}
+div.border-trc{
+  border: 1px solid rebeccapurple;
+  border-radius: 4px 4px 0 0;
+  padding: 10px;
+
+}
+div.border-brc{
+  border: 1px solid rebeccapurple;
+  border-radius:0 0 4px 4px;
+  padding: 10px;
+}
+
+.border{
+  border: 1px solid rebeccapurple;
+  border-radius: 0px;
+  padding: 10px;
+
+}
+
+.sensor .mdl-card__actions.mdl-card--border{
+  margin-top:10px;
+  padding: 2px; 
+}
+
+.mdl-cell .mdl-card__title img{
+  background: #00B7FF11;
+  max-height:50px;
+  max-width:50px;
+  margin: 5px;
+  margin-right: 20px;
+}
+
+.mdl-cell .mdl-card__title h5{
+  font-size: 18px;
+  font-weight: 400;
+  float: right;
+  align-self: center;
+  max-lines: 2;
+  word-wrap: break-word;
+}
+
+.mdl-cell .mdl-card__supporting-text.description {
+  font-size: 12px;
+  color: darkgray;
+  font-style: italic;
+  padding: 4px 16px;
+}
+
+.mdl-cell .mdl-card__supporting-text {
+  font-size: 14px;
+  color: black;
+  padding: 4px 16px;
+}
+
+.mdl-card__media.unconfigured{
+  background: gainsboro;
+  height:10px;
+}
+
+.mdl-card__media.online{
+  background: greenyellow;
+}
+
+.mdl-card__media.offline{
+  background: orangered;
+}
+
+.b{
+  background: #00B7FF;
+  width: 100%;
+}

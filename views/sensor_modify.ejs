@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../views/partials/html_head%>
+    <title>
+      <%= title %>
+    </title>
+
+</head>
+
+<body>
+  <% include ../views/partials/header%>
+
+    <form id="add_new_sensor" method="post" action="../api/sensor/add">
+      <div class="mdl-card-wide mdl-shadow--2dp" style="background: whitesmoke;">
+        <div class="mdl-card__title mdl-card--expand">
+          <h2 class="mdl-card__title-text">Modify Sensor</h2>
+        </div>
+        <div class="mdl-card__supporting-text" style="width: 98%;">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+            <input class="mdl-textfield__input" type="text" pattern="-?^[a-zA-Z0-9_]*?" name="name" id="name" value="<%= sensor.name %>"
+              required>
+            <label class="mdl-textfield__label" for="name">Name</label>
+            <span class="mdl-textfield__error">Use only characters, numbers or '_' !</span>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+            <input class="mdl-textfield__input" type="text" pattern="-?^[a-zA-Z0-9_]*?" name="model_type" id="model_type" value="<%= sensor.model_type %>"
+              required>
+            <label class="mdl-textfield__label" for="model_type">Model type</label>
+            <span class="mdl-textfield__error">Use only characters, numbers or '_' !</span>
+          </div>
+          <br>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+            <input class="mdl-textfield__input" type="text" name="description" id="description" value="<%= sensor.description %>">
+            <label class="mdl-textfield__label" for="description">Description</label>
+          </div>
+          <br>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" pattern="-?^[0-9]*?" name="num_of_pins" id="num_of_pins" value="<%= sensor.num_of_pins %>"
+              required>
+            <label class="mdl-textfield__label" for="num_of_pins">Number of Pins:</label>
+            <span class="mdl-textfield__error">Invalid Number!</span>
+          </div>
+          <br>
+          <div id="pins_layout" class="mdl-grid">
+            <%if(sensor.num_of_pins>0) { sensor.pin_label.forEach(function(el, index) { %>
+              <div class='mdl-cell--4-col-phone mdl-cell--8-col-tablet mdl-cell--5-col-desktop border m4'>
+                <table class='mdl-table'>
+                  <tr class="mdl-grid">
+                    <td class="mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--6-col">
+                      <div class='mdl-textfield mdl-js-textfield'>
+                        <spanv style="top:4px; font-size:10px;"> Pin Label: </span>
+                          <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='Pin label:' title="Use only characters, numbers or '_' !"
+                            name='pin_label' value="<%= sensor.pin_label[index] %>" required>
+                      </div>
+                    </td>
+
+                    <td class="mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--6-col">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <spanv style="top:4px; font-size:10px;"> Pin Type: </span>
+                          <select class="mdl-textfield__input" name='pin_type'>
+                            <option value="Analog" <% if(sensor.pin_type[index] === "Analog") {%>selected <%}%> >Analog</option>
+                            <option value="Digital" <% if(sensor.pin_type[index] === "Digital") {%>selected <%}%> >Digital</option>
+                          </select>
+                      </div>
+                    </td>
+                  </tr>
+
+                </table>
+                <br>
+              </div>
+            <% }); }%>
+          </div>
+
+          <input class="mdl-textfield__input hidden-gone" type="text" value="<%= sensor._id %>" name="_id" id="_id">
+          <br>
+          <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit" value="submit">
+        </div>
+      </div>
+    </form>
+
+    <script src="../javascripts/sensor_add.js"></script>
+    <% include ../views/partials/footer%>
+</body>
+
+</html>
