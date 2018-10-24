@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../views/partials/html_head%>
+  <title>
+    <%= title %>
+  </title>
+
+</head>
+
+<body>
+  <% include ../views/partials/header%>
+
+  <form id="add_new_esp" method="post" action="../api/esp/configure">
+    <div class="mdl-card-wide mdl-shadow--2dp" style="background: whitesmoke;">
+      <div class="mdl-card__title mdl-card--expand">
+        <h2 class="mdl-card__title-text">Configure ESP</h2>
+      </div>
+      <div class="mdl-card__supporting-text" style="width: 98%;">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.name %>" pattern="-?^[a-zA-Z0-9_]*?" name="name"
+            id="name" readonly>
+          <label class="mdl-textfield__label" for="name">Name</label>
+
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" readonly value="<%= esp.mac%>" pattern="-?^[a-zA-Z0-9:]*?"
+            name="mac" id="mac">
+          <label class="mdl-textfield__label" for="mac">MAC address</label>
+          <span class="mdl-textfield__error">Invalid MAC address!</span>
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.model_type %>" pattern="-?^[a-zA-Z0-9_]*?"
+            name="model_type" id="model_type" readonly>
+          <label class="mdl-textfield__label" for="model_type">Model type</label>
+
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.ip %>" pattern="-?^[0-9.]*?" name="ip" id="ip"
+            readonly>
+          <label class="mdl-textfield__label" for="ip">IP address</label>
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.description %>" name="description" id="description"
+            readonly style="max-lines: 10;">
+          <label class="mdl-textfield__label" for="description">Description</label>
+
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.num_of_pins %>" pattern="-?^[0-9]*?" name="num_of_pins"
+            id="num_of_pins" readonly>
+          <label class="mdl-textfield__label" for="num_of_pins">Number of Pins:</label>
+          <span class="mdl-textfield__error">Invalid Number!</span>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" <% if(esp.status==0){ %> value="OFFLINE"
+          <% }else if(esp.status == 1){ %>value= "ONLINE"
+          <% }else{ %>value= "UNCONFIGURED"
+          <%} %> name="status" id="status" readonly>
+          <label class="mdl-textfield__label" for="status">Status:</label>
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.sampling_freq %>" pattern="-?^[0-9]*?" name="sampling_freq"
+            id="sampling_freq">
+          <label class="mdl-textfield__label" for="sampling_freq">Sampling Frequency</label>
+          <span class="mdl-textfield__error">Invalid Number!</span>
+        </div>
+
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+          <input class="mdl-textfield__input" type="text" value="<%= esp.pin_label %>" name="pin_labels" id="pin_labels"
+            readonly>
+          <label class="mdl-textfield__label" for="pin_labels">Pin Labels</label>
+        </div>
+        <br>
+        <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit" value="SAVE">
+
+        <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="button" style="background:steelblue; color:white;"
+          value="ADD new Sensor">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label " style="padding-top:12px;margin: 0px 12px 0 20px;">
+
+          <span style="top:4px; font-size:10px;"> Select the sensor: </span>
+          <select class="mdl-textfield__input" name='sensor_name' hint:"select a sensor form the list">
+            <option disabled selected value> -- select an value -- </option>
+            <option value="DHT22">DHT22</option>
+            <option value="LED">LED</option>
+            <option value="BUTTON">BUTTON</option>
+            <option value="SSR01">SSR01</option>
+
+          </select>
+
+        </div>
+        <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="background:tomato; margin: 0 12px 0 20px;"
+          type="button" value="Discard changes">
+
+
+
+
+
+      </div>
+    </div>
+    <div id="configuration_layout" class="mdl-grid">
+      <%if(esp.num_of_pins>0) { esp.pin_label.forEach(function(el, index) { %>
+      <div class='mdl-cell--4-col-phone mdl-cell--8-col-tablet mdl-cell--5-col-desktop border m4'>
+        <table class='mdl-table'>
+          <tr class="mdl-grid">
+            <td class="mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--6-col">
+              <div class='mdl-textfield mdl-js-textfield'>
+                <span style="top:4px; font-size:10px;"> Pin Label: </span>
+                <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='Pin label:'
+                  title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pin_label[index] %>"
+                  required>
+              </div>
+            </td>
+
+            <td class="mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--6-col">
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <span style="top:4px; font-size:10px;"> Pin Type: </span>
+                <select class="mdl-textfield__input" name='pin_type'>
+                  <option value="Analog" <% if(esp.pin_type[index]==="Analog" ) {%>selected
+                    <%}%> >Analog</option>
+                  <option value="Digital" <% if(esp.pin_type[index]==="Digital" ) {%>selected
+                    <%}%> >Digital</option>
+                </select>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+        <br>
+      </div>
+      <% }); }%>
+    </div>
+  </form>
+
+  <script src="../javascripts/esp_configure.js"></script>
+  <% include ../views/partials/footer%>
+</body>
+
+</html>
