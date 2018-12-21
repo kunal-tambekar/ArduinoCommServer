@@ -1,5 +1,5 @@
 
-let ESP_STATES =["STATE_READY","STATE_WIFI_CONNECT","STATE_WIFI_ACTIVE","STATE_ACCESS_POINT_CONNECT","STATE_ACCESS_POINT_ACTIVE",
+let ESP_STATE =["STATE_READY","STATE_WIFI_CONNECT","STATE_WIFI_ACTIVE","STATE_ACCESS_POINT_CONNECT","STATE_ACCESS_POINT_ACTIVE",
 	"STATE_SLEEP","STATE_BOOTING","STATE_REQUEST_CONFIG","STATE_RESPONSE_CONFIG_DETAILS","STATE_CONFIG_UPDATED","STATE_ACTIVE",
   "STATE_PASSIVE","STATE_ONLINE","STATE_OFFLINE","STATE_OTA_AVAILABLE","STATE_INIT_OTA"];
 
@@ -22,19 +22,22 @@ const STATE_OFFLINE =13;
 const STATE_OTA_AVAILABLE =14;
 const STATE_INIT_OTA =15;
 
-let wsUri = "ws://localhost:3000";
+let wsUri = "ws://localhost:3000";  // "ws://10.0.0.54:3000";
 let output_console;
 let espState = STATE_BOOTING;
 let samplingFrequency;
-let esp_mac = "00:25:96:FF:FE:12:34:56";
+let esp_mac = "22:44:66:88:11:33:55"; //"00:11:22:33:44:55:66:77";  //"00:25:96:FF:FE:12:34:56";
 
 function init() {
+  let ipstr = $("#serverip").data("ip");
+  if(ipstr)
+    wsUri = "ws://"+ipstr+":3000";
   output_console = document.getElementById("output_console");
-  writeToScreen('<span style="color: green;">Booting... ESP_STATE: ' + ESP_STATES[espState]+'</span>');
+  writeToScreen('<span style="color: green;">Booting... ESP_STATE: ' + ESP_STATE[espState]+'</span>');
   setTimeout(() => {
     startWifi();
     printWifiStatus();
-  },1000);
+  },700);
 }
 
 function startWifi(){
@@ -76,7 +79,8 @@ function onOpen(evt) {
   let json = { 
     client: 0,
     mac : esp_mac,
-    code : STATE_REQUEST_CONFIG
+    code : STATE_REQUEST_CONFIG,
+    ip:"10.0.0.22"
    }
 
   doSend(json);
@@ -90,7 +94,17 @@ function onMessage(evt) {
   writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
   let res = JSON.parse(evt.data);
   if(res.state == STATE_RESPONSE_CONFIG_DETAILS){
-    
+    writeToScreen("RECEIVED BELOW CONFIGURATION: \n");
+
+    writeToScreen("ESP Model "+res.model_type);
+    writeToScreen("Sampling Frequency "+res.sampling_freq);
+
+    for(let i=0;i<res.num_of_pins;i++){
+      writeToScreen("Pin "+(i+1)+": ");
+      writeToScreen(res.pin_label[i]+" is connected to "+res.sensors[i]+"'s "+res.sensor_pin[i]+" pin in "+res.pin_mode[i]+" mode ");
+      writeToScreen("Additional info: "+res.misc_keys[i]+" : "+res.misc_val[i]);
+
+    }
 
   }else if(res.state == STATE_CONFIG_UPDATED){
 

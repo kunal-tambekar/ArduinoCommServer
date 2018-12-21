@@ -37,15 +37,21 @@ router.get('/sensor',function(req,res){
   });
 });
 
+router.get('/tmp',function(req,res){
+  db.getAllSensorNames(result=>{
+    res.json({sensors:result});
+  },err=>{
+    console.warn(err);
+    res.send("Temp API Error: "+err);
+  });
+});
+
 router.post('/sensor/add',function(req,res){
   console.log(JSON.stringify(req.body));
   if(req.body.num_of_pins === "1"){
     let lbl = req.body.pin_label;
     req.body.pin_label = [];
     req.body.pin_label.push(lbl);
-    let typ = req.body.pin_type;
-    req.body.pin_type = [];
-    req.body.pin_type.push(typ);
     console.log("\n\n\n"+JSON.stringify(req.body));
   }
   
@@ -86,12 +92,12 @@ router.get("/sensor/delete/:id",function(req,res){
 
 router.get('/esp',function(req,res){
   
-  let filter=-1;
-  // filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline
+  let filter=null;
+  // filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline [not in use]
   if(req.query.filter && Number.isInteger(Number.parseInt(req.query.filter))){
-    filter = req.query.filter % 3;
+    filter = req.query.filter % 2;
   }
-
+  console.log("req.query.filter "+req.query.filter );
   db.getAllEsps(filter,(result)=>{
     console.log("SUCCESS: "+JSON.stringify(result));
     res.json({esps:result});
@@ -107,9 +113,9 @@ router.post('/esp/add',function(req,res){
     let lbl = req.body.pin_label;
     req.body.pin_label = [];
     req.body.pin_label.push(lbl);
-    let typ = req.body.pin_type;
-    req.body.pin_type = [];
-    req.body.pin_type.push(typ);
+    // let typ = req.body.pin_type;
+    // req.body.pin_type = [];
+    // req.body.pin_type.push(typ);
     console.log("\n\n\n"+JSON.stringify(req.body));
   }
 
@@ -131,6 +137,20 @@ router.post('/esp/modify',function(req,res){
   },(err)=>{
     console.log(err);
     res.send("UPDATE ESP API Error: "+err);
+  });
+});
+
+router.post('/esp/configure',function(req,res){
+  console.log(JSON.stringify(req.body));
+  db.upsertConfiguration(req.body,(result)=>{
+    console.log("SUCCESS: "+JSON.stringify(result));
+    // db.updateEspWithMac({mac:req.body.mac},{mac:req.body.mac, status:1},(r)=>{
+      res.location("../../esp");
+      res.redirect("../../esp");
+    // },(e)=>{console.log(e)});
+
+  },(err)=>{
+    console.log(err);
   });
 });
 

@@ -7,7 +7,7 @@ function deleteSensor(e) {
     $.get( durl,
       function (data) {
         window.open("../../../sensor","_self");
-        alert("Deleted "+modelType+" Sensor.");
+        alert("Deleted "+modelType+" sensor.");
     });  
   }
 

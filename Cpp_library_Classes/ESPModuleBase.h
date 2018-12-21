@@ -58,6 +58,8 @@ class ESPModuleBase{
 		      char* _ota_server_port;
 
           int samplingFrequency;
+          int _num_of_pins;
+          SensorBase* _sensors;
           ESPState state;
 
   public:

@@ -7,45 +7,58 @@ router.get('/', function(req, res) {
 });
 
 router.get('/home', function(req, res, next) {
-  let filter=-1;
+  let filter=null;
   // filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline
   if(req.query.filter && Number.isInteger(Number.parseInt(req.query.filter))){
-    filter = req.query.filter % 3;
+    filter = req.query.filter % 2;
   }
 
   db.getAllEsps(filter,result=>{
     console.log(JSON.stringify(result));
-    res.render('esp_home',{title:'ESP Home', esps : result})
+    res.render('esp_home',{title:'ESP HOME', esps : result});
   },err=>{
-    res.send("ESP HOME JS ERROR while fetching Sensor info :"+ JSON.stringify(err))
+    res.send("ESP HOME JS ERROR while fetching Sensor info :"+ JSON.stringify(err));
   });
-
 });
 
 router.get('/add', function(req, res, next) {
-  res.render('esp_add',{title:'Add ESP'});
-});
-
-router.get('/configure', function(req, res, next) {
-  db.getEspByMac(req.query.mac,
-    result=>{
-      res.render('esp_configure',{title:'Configure ESP', esp : result});
-      
-    },
-    err=>{
-      res.send("ESP MODIFY JS ERROR while fetching Sensor info :"+ JSON.stringify(err));
-    });
+  res.render('esp_add',{title:'ADD ESP'});
 });
 
 router.get('/modify', function(req, res, next) {
   db.getEspByMac(req.query.mac,
     result=>{
-      res.render('esp_modify',{title:'Modify ESP', esp : result });
+      res.render('esp_modify',{title:'EDIT ESP', esp : result });
     },
     err=>{
       res.send("ESP MODIFY JS ERROR while fetching Sensor info :"+ JSON.stringify(err));
     });
   
+});
+
+router.get('/configure', function(req, res, next) {
+  db.getEspByMac(req.query.mac,
+    result=>{
+      db.getAllSensorNames(sensors=>{
+        res.render('esp_configure',{title:'CONFIGURE ESP', esp : result ,config:"", sensors});
+      },e=>{
+        res.send("ESP MODIFY JS ERROR while fetching Sensor names :"+ JSON.stringify(e));
+      })
+    },
+    err=>{
+      res.send("ESP MODIFY JS ERROR while fetching ESP info :"+ JSON.stringify(err));
+    });
+});
+
+router.get('/view', function(req, res, next) {
+  let espId = req.query.mac;
+  db.getEspByMac(req.query.mac,
+    result=>{
+      res.render('esp_view',{title:'VIEW ESP', esp : result});
+    },
+    err=>{
+      res.send("ESP VIEW JS ERROR while fetching info :"+ JSON.stringify(err));
+    });
 });
 
 module.exports = router;

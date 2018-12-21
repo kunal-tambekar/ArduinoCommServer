@@ -15,14 +15,13 @@
     <div class="mdl-grid mdl-card mdl-card__actions" style="top:70px; right:20px; margin: 5px; min-height: 50px; float:right; position: fixed; z-index: 999; overflow: visible;">
       <button id="sort-sensor-menu" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
         style="position: absolute; right:200px;">
-        <i class="material-icons">sort</i> SORT
+        <i class="material-icons">filter_list</i> FILTER
       </button>
 
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="sort-sensor-menu" style="z-index: 999; min-width: 90px;">
-        <li class="mdl-menu__item" onclick="window.open('../esp/home','_self')"> Name ↑ </li>
-        <li class="mdl-menu__item" onclick="window.open('../esp/home?sort=1','_self')"> Name ↓ </li>
-        <li class="mdl-menu__item" onclick="window.open('../esp/home?sort=2','_self')">Model ↑ </li>
-        <li class="mdl-menu__item" onclick="window.open('../esp/home?sort=3','_self')">Model ↓ </li>
+        <li class="mdl-menu__item" onclick="window.open('../esp/home','_self')"> ALL </li>
+        <li class="mdl-menu__item" onclick="window.open('../esp/home?filter=1','_self')"> Configured </li>
+        <li class="mdl-menu__item" onclick="window.open('../esp/home?filter=0','_self')">Unconfigured </li>
       </ul>
 
       <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="window.open('/esp/add','_self');"
@@ -38,8 +37,11 @@
       <% if(esps && esps.length > 0){%>
         <% esps.forEach(function(el, index) { %>
           <div class="mdl-cell mdl-card mdl-shadow--4dp portfolio-card sensor" style="max-height: 240px;">
-            <div class="mdl-card__media unconfigured">
-            </div>
+            <%if(el.status==0) {%>
+              <div class="mdl-card__media unconfigured"></div>
+            <% }else{%>
+              <div class="mdl-card__media online"></div>
+            <% } %>
             <div class="mdl-card__title" style="padding: 12px 16px 4px;">
               <!-- <img src="../images/sensor_default.png"> -->
               <h5 class="mdl-card__title-text"><%= el.name %></h5>
@@ -57,19 +59,25 @@
                 <strong>Pins:</strong> <%= el.pin_label %>
               </div>
             <div class="mdl-card__actions mdl-card--border" style="position:inherit;bottom:0;">
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent" href="/esp/configure?mac=<%= el.mac %>"
+              <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" href="/esp/view?mac=<%= el.mac %>"
+                style="background:var(--accent-green); color:black;" data-upgraded=",MaterialButton,MaterialRipple">VIEW
+              <span class="mdl-button__ripple-container">
+                <span class="mdl-ripple"></span>
+              </span>
+              </a>
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" href="/esp/configure?mac=<%= el.mac %>"
                   style="color: GREEN;" data-upgraded=",MaterialButton,MaterialRipple">Configure
                 <span class="mdl-button__ripple-container">
                   <span class="mdl-ripple"></span>
                 </span>
               </a>
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent" href="/esp/modify?mac=<%= el.mac %>"
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" href="/esp/modify?mac=<%= el.mac %>"
                   data-upgraded=",MaterialButton,MaterialRipple">Edit
                 <span class="mdl-button__ripple-container">
                   <span class="mdl-ripple"></span>
                 </span>
               </a>
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent" onclick="deleteEsp(this)" data-mac="<%=el.mac %>" href="#"
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" onclick="deleteEsp(this)" data-mac="<%=el.mac %>" href="#"
                   style="color: red; float: right;" data-upgraded=",MaterialButton,MaterialRipple">DELETE
                 <span class="mdl-button__ripple-container">
                   <span class="mdl-ripple"></span>

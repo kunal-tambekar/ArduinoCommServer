@@ -2,12 +2,15 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
+var cors = require('cors');
 var logger = require('morgan');
-var db = require('./routes/database');
 
-var indexRouter = require('./routes/index');
+const wsserver = require('./routes/wsserver');
+const sioserver = require('./routes/socketioserver');
+
 var apiRouter = require('./routes/apirouter');
 
+var indexRouter = require('./routes/index');
 var sensorRouter = require('./routes/sensor');
 var espRouter = require('./routes/esp');
 
@@ -22,8 +25,16 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: false
 }));
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// enabling cross origin resource sharing, so that any domain can access the APIs
+app.use(cors());
+
+app.get('/socketiotest', function(req, res){
+  res.sendFile(__dirname + '/tests/sockiotest.html');
+});
 
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
@@ -33,13 +44,29 @@ app.use('/esp', espRouter);
 app.use('/about', function(req, res, next) {
   res.render('about', {
       head_title: 'About',
-      title: 'About'
+      title: 'ABOUT'
 
   });
 });
 
+// code to get server ip
+var os = require('os');
+
+var interfaces = os.networkInterfaces();
+var addresses = [];
+for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+        var address = interfaces[k][k2];
+        if (address.family === 'IPv4' && !address.internal) {
+            addresses.push(address.address);
+        }
+    }
+}
+app.serverip = addresses;
+console.log(app.serverip);
+
 app.use('/mock_esp', function(req, res, next) {
-  res.render('esp_mock', {});
+  res.render('esp_mock', { server: {ip : app.serverip} });
 });
 
 
@@ -67,8 +94,7 @@ server.listen(3000,function listening(){
   console.log("ArduinoComm Listening on port "+server.address().port);
 });
 
-const wsserver = require('./routes/wsserver');
-
+sioserver.initSocketioServer(server);
 wsserver.initWebSocketServer(server);
 
 module.exports = app;

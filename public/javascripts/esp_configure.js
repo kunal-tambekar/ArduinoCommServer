@@ -1,5 +1,9 @@
 $(function () {
 
+  $.getJSON( "../api/sensor", function( data ) {
+    console.log(JSON.stringify(data));
+  });
+
   $("#num_of_pins").on('input', (ev) => {
     let nop = $("#num_of_pins").val();
     $("#pins_layout").empty();

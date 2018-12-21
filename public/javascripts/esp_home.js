@@ -1,6 +1,6 @@
 function deleteEsp(e) {
   let mac= $(e).data("mac");
-  var del = confirm("Are you sure you want to delete this ESP [MAC: " + mac + " ]?");
+  var del = confirm("Are you sure you want to delete this ESP [MAC: " + mac + " ]? Its configuration will also be deleted!");
     
   if(del) {
     var durl = 'http://localhost:3000/api/esp/delete/' + mac;

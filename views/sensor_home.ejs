@@ -23,6 +23,8 @@
         <li class="mdl-menu__item" onclick="window.open('../sensor/home?sort=1','_self')"> Name ↓ </li>
         <li class="mdl-menu__item" onclick="window.open('../sensor/home?sort=2','_self')">Model ↑ </li>
         <li class="mdl-menu__item" onclick="window.open('../sensor/home?sort=3','_self')">Model ↓ </li>
+        <li class="mdl-menu__item" onclick="window.open('../sensor/home?sort=4','_self')">Category </li>
+
       </ul>
 
       <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="window.open('/sensor/add','_self');"
@@ -37,8 +39,8 @@
 
       <% if(sensors && sensors.length > 0){%>
         <% sensors.forEach(function(el, index) { %>
-          <div class="mdl-cell mdl-card mdl-shadow--4dp portfolio-card sensor" style="max-height: 240px;">
-            <div class="mdl-card__media unconfigured">
+          <div class="mdl-cell mdl-card mdl-shadow--4dp portfolio-card sensor-card" style="max-height: 240px;">
+            <div class="mdl-card__media <%if (el.category == 1){ %> sensor <%}else{ %> actuator <%}%>">
             </div>
             <div class="mdl-card__title" style="padding: 12px 16px 4px;">
               <!-- <img src="../images/sensor_default.png"> -->
@@ -48,7 +50,8 @@
                 <%= el.description %>
             </div>
             <div class="mdl-card__supporting-text">
-              <strong>Model type: </strong> <%= el.model_type %>
+              <strong>Model: </strong> <%= el.model_type %>
+              <i style="margin: 0 8px; color:var(--accent-green); "><% if(el.category==0){ %> [ACTUATOR] <%}else{%> [SENSOR] <%}%></i>
             </div>
             <div class="mdl-card__supporting-text">
               <strong>Number of Pins:</strong> <%= el.num_of_pins %>

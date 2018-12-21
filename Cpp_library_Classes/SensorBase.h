@@ -26,6 +26,7 @@ class SensorBase{
   SensorBase(){};
   ~SensorBase(){};
 
+  void initialize();
   void readData();
   void sendData();
 

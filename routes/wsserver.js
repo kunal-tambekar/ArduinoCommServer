@@ -18,31 +18,65 @@ exports.initWebSocketServer = function (server) {
       }catch(excp){
         console.warn("non JSON data received: "+message);
       }
-
-      if(msg.client == 0 ){
-        // message is from ESP
+      // message is from ESP
+      if(msg.client == 0 ){  
         console.log("ESP Message : " + JSON.stringify(msg));
+        //ESP requested config from server
         if (msg.code == constants.STATE_REQUEST_CONFIG) { 
           console.log("Configuration Request received");
-          //check if MAC address is in the DB 
-          // IF Yes : change status to online and check config table for configurations info  to send back
-          // ELSE No: Add the ESP to the espDB and make it online [unconfigured]
-          db.getEspByMac(msg.mac,function(doc){
-            doc.state=constants.STATE_RESPONSE_CONFIG_DETAILS;
-            doc.code = constants.STATE_ACTIVE; // default to Active
-            ws.send(JSON.stringify(doc));
-          },(err)=>{
-            console.warn(err);
-            
-          })
+          //check if ESP config is present in based on MAC address
+          // IF Yes : change status to CONFIGURED and check config table for configurations info to send back
           
-  
-        } else {
+          db.getEspByMac(msg.mac,function(doc){
+            if(doc.mac === msg.mac){
+              console.log("Found info in ESP_collection, looking for configuration "+doc.status+":"+doc.mac);
+              if( doc.status == constants.ESP_CONFIGURED){
+                db.getConfigurationByEspId(doc.mac,function(conf){
+                  conf.state=constants.STATE_RESPONSE_CONFIG_DETAILS;
+                  conf.code = constants.STATE_ACTIVE; // default to Active
+                  ws.send(JSON.stringify(conf));
+                },(er)=>{
+                  console.warn("Error while searching in ESP_collection: "+er);
+                });
+              }else{
+                console.log(msg.mac+" not yet configured");
+              }
+              // ELSE No: Add the ESP to the espDB and make it configured [unconfigured]
+            }else{
+              let newEsp = {
+                "mac":msg.mac,
+                "ip":msg.ip,
+                "status":0,
+                "name":"ESP_"+msg.mac,
+                "description":"Newly added unconfigured ESP",
+                "model_type":"ESP8266",
+                "num_of_pins":2,
+                "pin_label" : [ "GPIO_0",   "GPIO_2" ],
+              };
+              db.upsertEsp(newEsp,function(doc){
+                console.log("Added new esp to esp_collection as unconfigured: "+msg.mac);
+              },er=>{
+                console.warn("Error while adding to ESP_collection: "+er);
+              });
+            }
+                
+            },(err)=>{
+              console.warn(err);
+          });
+          
+        // ESP send data to server
+        } else if( msg.code == constants.STATE_ACTIVE ){
+          // Take the data and enter into the data_collection
+          // NOTE : remember to create a trigger for pushing new values to all clients
+          
+
+
+        }else {
 
         }
-
+      // message is from Web Client
       }else if(msg.client == 1 ){ 
-        // message is from Web Client
+       
 
         if (msg.code == "DASHBOARD_INFO") {
           // <NOTE> USE socket io for client side socket communication
@@ -70,15 +104,13 @@ exports.initWebSocketServer = function (server) {
       }
 
       
-      
-
       console.log('Server received: %s from ' + message + ' with IP %s', msg.code, req.connection.remoteAddress);
 
     });
 
     ws.on('error', function errCloseConnection(error) {
       console.log("There was an " + error);
-      espObserverMap.delete(ws);
+      // espObserverMap.delete(ws);
 
       var pos = dashboardList.indexOf(ws);
       dashboardList.splice(pos, 1);

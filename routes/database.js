@@ -47,7 +47,8 @@ exports.removeSensorByType= function (t, succ, fail) {
     0 - sort by name ascending ; 
     1 sort by name desc ; 
     2 sort by model_type asc ; 
-    3 sort by model_type desc 
+    3 sort by model_type desc ;
+    4 sort by category;
 */
 exports.getAllSensors = function (sort,succ, fail) {
     var collection = db.get('sensor_collection');
@@ -59,10 +60,28 @@ exports.getAllSensors = function (sort,succ, fail) {
             break;
         case 3: 
             filter = {sort: {model_type: -1}};
+            break;
+        case 4: 
+            filter = {sort: { category: -1,name:1}};
+            break;
         default:
             break;
     }
 
+    collection.find({}, filter, function (err, docs) {
+        if (err === null) {
+            succ(docs);
+        } else {
+            fail(err);
+        }
+    }); 
+}
+
+exports.getAllSensorNames = function (succ, fail) {
+    var collection = db.get('sensor_collection');
+    let filter = {  fields: {_id:0,model_type:1},
+                    sort: {model_type: 1}
+                };
     collection.find({}, filter, function (err, docs) {
         if (err === null) {
             succ(docs);
@@ -91,7 +110,9 @@ exports.getSensorById = function (id, succ, fail) {
 // USE FOR ADD NEW and UPDATE existing Esp - using upsert : Update and/or insert
 exports.upsertEsp = function (esp, succ, fail) {
     var collection = db.get('esp_collection');
-    esp.status = -1;
+    if(!esp.status){
+        esp.status=0;
+    }
     // collection.insert(esp, function (err, result) 
     collection.update({ mac : esp.mac },esp, {upsert:true}, function (err, result) {
         if (err === null) {
@@ -103,11 +124,19 @@ exports.upsertEsp = function (esp, succ, fail) {
 }
 
 exports.removeEspWithMac= function (del, succ, fail) {
-    // 'del' can be '_id' or 'mac' : Shall be constructed in API wrapper
+    // 'del' is 'mac' : Shall be constructed in API wrapper
     var collection = db.get('esp_collection');
     collection.remove(del, function (err, result) {
         if (err === null) {
-            succ(result);
+            db.get('configuration_collection').remove(del, function (e, r) {
+                if (e === null) {
+                    console.log("WAS DELETED: "+r);
+                    succ(result);
+                } else {
+                    fail(e);
+                }
+            });
+            
         } else {
             fail(err);
         }
@@ -123,9 +152,11 @@ exports.updateEspWithMac= function (mac,esp, succ, fail) {
             fail(err);
         }
     });
+
 }
 
 exports.getAllEsps = function (filter, succ, fail) {
+    console.log("FILTER: "+filter);
     var collection = db.get('esp_collection');
     let fltr;
     if (filter === null||filter===undefined) {
@@ -174,12 +205,21 @@ exports.getEspCount = function (succ, fail) {
 
 /* CONFIGURATION  */
 
-exports.addNewConfiguration = function (obj,succ, fail) {
+exports.upsertConfiguration = function (obj,succ, fail) {
 
     var collection = db.get('configuration_collection');
-    collection.insert(obj, function (err, result) {
+    // collection.insert(obj, function (err, result) {
+    collection.update({ mac : obj.mac },obj, {upsert:true}, function (err, result) {
         if (err === null) {
-            succ(result);
+            let esp = {mac: obj.mac , status:1}
+            db.get('esp_collection').update({mac:obj.mac},{$set:esp}, function (e, r) {
+                if (err === null) {
+                    succ(result);
+                } else {
+                    fail(e);
+                }
+            });
+            // succ(result);
         } else {
             fail(err);
         }
@@ -189,7 +229,7 @@ exports.addNewConfiguration = function (obj,succ, fail) {
 exports.removeConfigurationById = function (id,succ, fail) {
 
     var collection = db.get('configuration_collection');
-    collection.remove({id:id}, function (err, result) {
+    collection.remove({mac:id}, function (err, result) {
         if (err === null) {
             succ(result);
         } else {
@@ -198,10 +238,10 @@ exports.removeConfigurationById = function (id,succ, fail) {
     });
 }
 
-exports.updateConfigurationById = function (id,conf,succ, fail) {
+exports.updateConfigurationById = function (mac,conf,succ, fail) {
 
     var collection = db.get('configuration_collection');
-    collection.update({id:id}, {$set:conf},function (err, result) {
+    collection.update({mac:mac}, {$set:conf},function (err, result) {
         if (err === null) {
             succ(result);
         } else {
@@ -211,10 +251,10 @@ exports.updateConfigurationById = function (id,conf,succ, fail) {
 }
 
 exports.getConfigurationByEspId = function (eid, succ, fail) {
-
+    //eid is mac
     var collection = db.get('configuration_collection');
     collection.findOne({
-        esp_id: eid
+        mac: eid
     }, {}, function (err, doc) {
         if (err === null) {
             succ(doc);

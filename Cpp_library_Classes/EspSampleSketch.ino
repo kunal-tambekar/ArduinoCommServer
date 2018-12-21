@@ -22,11 +22,11 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.printf("X Web Socket Disconnected!\n");
       break;
     case WStype_CONNECTED: {
-      Serial.printf("Connected to url: %s\n", payload);
-      // send message to server when Connected
-      // In case of the Echo server this same message will be sent back
-      webSocket.sendTXT("Connected and Messaged");
-    }
+        Serial.printf("Connected to url: %s\n", payload);
+        // send message to server when Connected
+        // In case of the Echo server this same message will be sent back
+        webSocket.sendTXT("Connected and Messaged");
+      }
       break;
     case WStype_TEXT:
       StaticJsonBuffer<200> jsonBuffer;
