@@ -3,6 +3,8 @@
 
 <head>
   <% include ../views/partials/html_head%>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
   <title>
     <%= title %>
   </title>
@@ -11,10 +13,93 @@
 
 <body>
   <% include ../views/partials/header%>
+  <div class="mdl-grid portfolio-max-width" style="margin-top: 0px; padding:10px;">
 
+    <% if(!data.isDataAvailable) { %>
+    <div class="mdl-cell mdl-card mdl-shadow--4dp portfolio-card" style="width:calc(100%);">
+      <div class="mdl-card__media" style="height:3px; background: var(--accent-green);">
+      </div>
+      <div class="mdl-card__title">
+        <h5 class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;">NO
+          DATA FOUND</h5>
+      </div>
+      <div class="mdl-card__title">
+        <h6 class="mdl-card__title-text" style="width:100%; font-size: 18px; color: grey; display:inline; text-align: center;">No
+          data collected from sensors attached to the ESP with MAC[
+          <%= esp.mac %>]</h6>
+      </div>
+    </div>
+    <%}else{%>
+    <div class="mdl-cell mdl-shadow--4dp portfolio-card " style="min-height:600px; width:calc(100%); background: white; text-align: center;">
+      <div class="mdl-card__media" style="height:3px; background: var(--accent-green);">
+      </div>
+      <div class="mdl-cell--4-col-phone mdl-cell--8-col-tablet mdl-cell--9-col-desktop" style="float:left;">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div class="border-rc mdl-card mdl-shadow--4dp mdl-cell--4-col-phone mdl-cell--8-col-tablet  mdl-cell--3-col-desktop"
+        style="float: right; margin: 8px;">
+        <div class="mdl-card__title">
+          <h5 id="eid" data-mac="<%= esp.mac %>" class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;">NO
+            DATA FOUND</h5>
+        </div>
+        <div class="mdl-card__title">
+          <h6 class="mdl-card__title-text" style="width:100%; font-size: 18px; color: grey; display:inline; text-align: center;">No
+            data collected from sensors attached to the ESP with MAC Address [<%= esp.mac %>]</h6>
+        </div>
+        <div style="float: left;">
+          <div class='mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--6-col'>
+            <span style="top:4px; font-size:10px; color: var(--accent-green); float: left;"> Page number: </span>
+            <br>
+            <input class='mdl-textfield__input' type='number' pattern='-?^[0-9]*?' placeholder='e.g.: 1' title="Use only numbers!"
+              id='page' value="<%= data.page %>">
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--6-col">
+            <span style="top:4px; font-size:10px; color: var(--accent-green); float: left;"> Select page size: </span>
+            <br>
+            <select class="mdl-textfield__input" id='page_size' hint='select number of results to view on graph'
+              data-required=true>
+              <option value="5" <% if(data.page_size==5){ %> selected <% }%> >5</option>
+              <option value="10" <% if(data.page_size==10){ %> selected <% }%> >10</option>
+              <option value="15" <% if(data.page_size==15){ %> selected <% }%> >15</option>
+              <option value="20" <% if(data.page_size==20){ %> selected <% }%> >20</option>
+            </select>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--12-col">
+              <span style="top:4px;font-size:10px; color: var(--accent-green);"> Select data to display: </span>
 
-  <script src="../javascripts/esp_view.js"></script>
+              <select class="mdl-textfield__input" id='parameter' hint='select number of results to view on graph'
+                data-required=true style="margin-top:4px; ">
+                <option value="TEMPERATURE" <% if(data.page_size=="TEMPERATURE"){ %> selected <% }%> >TEMPERATURE</option>
+                <option value="HUMIDITY" <% if(data.page_size=="HUMIDITY"){ %> selected <% }%> >HUMIDITY</option>
+              </select>
+            </div>
+        </div>
+        <br>
+        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" id="fetchData" 
+        style="background:var(--accent-green); color:black;" data-upgraded=",MaterialButton,MaterialRipple">Fetch Data
+          <span class="mdl-button__ripple-container">
+            <span class="mdl-ripple"></span>
+          </span>
+        </button>
+        <br>
+        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" id="randomizeData" 
+        style="background:var(--accent-green); color:black;" data-upgraded=",MaterialButton,MaterialRipple">Randomize Data
+          <span class="mdl-button__ripple-container">
+            <span class="mdl-ripple"></span>
+          </span>
+        </button>
+
+        <button id="addData">Add Data</button>
+        <button id="removeData">Remove Data</button>
+      </div>
+    </div>
+    <%}%>
+  </div>
+
+  <script src="../javascripts/client_utils.js"></script>
   <script src="../javascripts/data_required_script.js"></script>
+  <script src="../javascripts/esp_view.js"></script>
+
   <% include ../views/partials/footer%>
 </body>
 

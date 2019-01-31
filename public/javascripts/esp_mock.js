@@ -32,8 +32,11 @@ function init() {
   let ipstr = $("#serverip").data("ip");
   if(ipstr)
     wsUri = "ws://"+ipstr+":3000";
+  console.log("ip or hostname "+ipstr );
+  console.log("host from url:"+window.location.hostname);
+
   output_console = document.getElementById("output_console");
-  writeToScreen('<span style="color: green;">Booting... ESP_STATE: ' + ESP_STATE[espState]+'</span>');
+  writeToScreen('<span style="color: lightgreen;">Booting... ESP_STATE: ' + ESP_STATE[espState]+'</span>');
   setTimeout(() => {
     startWifi();
     printWifiStatus();
@@ -42,15 +45,15 @@ function init() {
 
 function startWifi(){
   setTimeout(() => {
-    writeToScreen('<span style="color: green;">check for ssid and password and try connecting to Wifi </span>');    
+    writeToScreen('<span style="color: lightgreen;">check for ssid and password and try connecting to Wifi </span>');    
     initWebsocket();
   }, 500);
 }
 
 function printWifiStatus(){
   setTimeout(() => {
-    writeToScreen('<span style="color: green;">WiFi connected </span>');
-    writeToScreen('<span style="color: green;">SSID, IP Address and signal strength displayed on screen </span>');
+    writeToScreen('<span style="color: lightgreen;">WiFi connected </span>');
+    writeToScreen('<span style="color: lightgreen;">SSID, IP Address and signal strength displayed on screen </span>');
   },1000);
 }
 
@@ -91,7 +94,7 @@ function onClose(evt) {
 }
 
 function onMessage(evt) {
-  writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+  writeToScreen('<span style="color: cyan;">RESPONSE: ' + evt.data + '</span>');
   let res = JSON.parse(evt.data);
   if(res.state == STATE_RESPONSE_CONFIG_DETAILS){
     writeToScreen("RECEIVED BELOW CONFIGURATION: \n");
@@ -120,7 +123,7 @@ function onError(evt) {
 }
 
 function doSend(message) {
-  writeToScreen('<span style="color: purple;">SENT: ' + JSON.stringify(message) +'</span>');
+  writeToScreen('<span style="color: yellow;">SENT: ' + JSON.stringify(message) +'</span>');
   websocket.send(JSON.stringify(message));
 }
 

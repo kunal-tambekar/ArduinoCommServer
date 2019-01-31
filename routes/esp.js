@@ -38,23 +38,40 @@ router.get('/modify', function(req, res, next) {
 
 router.get('/configure', function(req, res, next) {
   db.getEspByMac(req.query.mac,
-    result=>{
-      db.getAllSensorNames(sensors=>{
-        res.render('esp_configure',{title:'CONFIGURE ESP', esp : result ,config:"", sensors});
-      },e=>{
-        res.send("ESP MODIFY JS ERROR while fetching Sensor names :"+ JSON.stringify(e));
+    esp=>{
+      db.getAllSensorNames(
+        sensors=>{
+          db.getConfigurationByEspId(req.query.mac,
+            config=>{
+              console.log("CONFIG: "+JSON.stringify(config))
+              res.render('esp_configure',{title:'CONFIGURE ESP', esp : esp ,config:(config?config:""), sensors});
+            },e=>{
+            res.send("ESP CONFIGURE JS ERROR while fetching ESP config :"+ JSON.stringify(e));
+          })
+      },er=>{
+        res.send("ESP CONFIGURE JS ERROR while fetching Sensor names :"+ JSON.stringify(er));
       })
     },
     err=>{
-      res.send("ESP MODIFY JS ERROR while fetching ESP info :"+ JSON.stringify(err));
+      res.send("ESP CONFIGURE JS ERROR while fetching ESP info :"+ JSON.stringify(err));
     });
 });
 
 router.get('/view', function(req, res, next) {
+
   let espId = req.query.mac;
-  db.getEspByMac(req.query.mac,
+
+  db.getEspByMac(espId,
     result=>{
-      res.render('esp_view',{title:'VIEW ESP', esp : result});
+      res.render('esp_view',{ 
+        title:'VIEW ESP', 
+        esp : result,
+        data: { isDataAvailable : true,
+                page: 1 ,
+                page_size : 10
+              }
+      
+      });
     },
     err=>{
       res.send("ESP VIEW JS ERROR while fetching info :"+ JSON.stringify(err));

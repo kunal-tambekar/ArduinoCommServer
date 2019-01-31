@@ -29,7 +29,7 @@
             <span class="mdl-textfield__error">Invalid MAC address!</span>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--4-col-desktop hidden">
-            <input class="mdl-textfield__input" type="text" pattern="-?^[0-1]*?" name="status" id="status" data-required=true readonly value="<%= esp.status%>">
+            <input class="mdl-textfield__input" type="number" pattern="-?^[0-1]*?" name="status" id="status" data-required=true readonly value="<%= esp.status%>" >
             <label class="mdl-textfield__label" for="status">Status: </label>
             <span class="mdl-textfield__error">Invalid status!</span>
           </div>

@@ -8,15 +8,55 @@ router.get('/', function(req, res, next) {
   var qs = req.query;
   console.log(JSON.stringify(req.headers));
   
-  res.json({message:'Please enter specific url for the data you need >> '+Object.keys(qs),
+  res.json({message:'GET request test: >> '+Object.keys(qs),
             url: JSON.stringify(qs)
           });
 });
 
+router.get('/temp',function(req,res){
+
+  // nested API calls
+  // db.getSensorCount( sensors =>{
+  //   db.getEspCount( result =>{
+  //     result.sensors = sensors.sensors;
+  //     res.json(result);
+  //   },
+  //   er =>{
+  //     res.send("Temp API ESP Error: "+er);
+  //   });
+  // },err=>{
+  //   console.warn(err);
+  //   res.send("Temp API Sensor Error: "+err);
+  // });
+
+  console.log(req.query.page+" "+req.query.size);
+  db.getAllEspsPagewise(parseInt(req.query.page),parseInt(req.query.size),result =>{
+    res.json(result);
+  },err=>{
+    res.send("Temp API ESP Error: "+err);
+  });
+});
+
 /* POST api base url. */
 router.post('/', function(req, res, next) {
-    const param1 = req.body.param1;
-    res.json({message:'Please enter specific url for the data you need '+param1});
+    res.json({message:'POST req test: '+JSON.stringify(req.body)});
+});
+
+/* HOME DASHBOARD
+   - ESP and sensor count */
+router.get('/dashboard_info',function(req,res){
+  db.getSensorCount( sensors =>{
+    db.getEspCount( result =>{
+      result.sensors = sensors.sensors;
+      res.json(result);
+    },
+    er =>{
+      res.send("Dashboard API ESP Error: "+er);
+    });
+  },err=>{
+    console.warn(err);
+    res.send("Dashboard API Sensor Error: "+err);
+  });
 });
 
 /* SENSORS */
@@ -34,15 +74,6 @@ router.get('/sensor',function(req,res){
   },(err)=>{
     console.warn(err);
     res.send("GET SENSOR API Error: "+err);
-  });
-});
-
-router.get('/tmp',function(req,res){
-  db.getAllSensorNames(result=>{
-    res.json({sensors:result});
-  },err=>{
-    console.warn(err);
-    res.send("Temp API Error: "+err);
   });
 });
 
@@ -88,12 +119,12 @@ router.get("/sensor/delete/:id",function(req,res){
 
 });
 
-/*ESP */
+/* ESP */
 
 router.get('/esp',function(req,res){
   
   let filter=null;
-  // filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline [not in use]
+  // NOTE: filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline [not in use]
   if(req.query.filter && Number.isInteger(Number.parseInt(req.query.filter))){
     filter = req.query.filter % 2;
   }
@@ -163,6 +194,44 @@ router.get("/esp/delete/:mac",function(req,res){
       console.warn(err);
       res.send("DELETE ESP API Error: "+err);
     });
+});
+
+
+/* DATA */
+
+router.post('/data',function(req,res){
+  
+  let pno=parseInt(req.body.page);
+  let count = parseInt(req.body.page_size);
+  let param =  req.body.parameter;
+  let mac = req.body.mac;
+
+  
+  console.log("MAC= "+mac+"  Page= "+pno+" PageSize= "+count+" PARAMETER = "+param );
+  db.getEspDataPagewise(mac,param,pno,count,result =>{
+    // temp dummy data 
+    result = [{
+      "timestamp": 1547179009000,
+      "value": (Math.floor(Math.random() * 200) - 100)
+    },{
+      "timestamp": 1547179119000,
+      "value": (Math.floor(Math.random() * 200) - 100)
+    },{
+      "timestamp": 1547179229000,
+      "value": (Math.floor(Math.random() * 200) - 100)
+    },{
+      "timestamp": 1547179339000,
+      "value": (Math.floor(Math.random() * 200) - 100)
+    },{
+      "timestamp": 1547179449000,
+      "value": (Math.floor(Math.random() * 200) - 100)
+    }];
+    
+  
+    res.json(result);
+  },err=>{
+    res.send("Temp API ESP Error: "+err);
+  });
 });
 
 

@@ -1,6 +1,7 @@
 :root{
   --zoom-scale:0.9;
-  --accent-green:rgb(139,195,74);
+  /* --accent-green:rgb(139,195,74);  */
+  --accent-green:#8BC34A; 
   --accent-blue: #00B7FF;
 }
 html{
@@ -16,9 +17,9 @@ body {
   padding: 0px;
   height: 100%;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-image: url('../images/bg.jpg');
+  /* background-image: url('../images/bg.jpg'); */
   background-size: 100%;
-  background-color: #3333;
+  background-color: #efefef;
   min-height: 600px;
 }
 
@@ -26,14 +27,29 @@ body h3, body .mdl-layout__header-row .mdl-navigation__link,
 body header .mdl-layout-title, 
 body .mdl-layout__drawer-button i{
   color : white;
+  opacity: 1;
+}
+body .mdl-layout__header-row a.mdl-navigation__link{
+  font-size: 16px;
+}
+body .mdl-layout__header-row a.mdl-navigation__link:hover{
+  text-decoration: underline;
+  font-style: italic;
+}
+
+ /* div.chartjs-size-monitor { 
+  max-width: 65%;
+}
+canvas {
+  max-width: 98%;
+} */
+
+a {
+  color: var(--accent-blue);
 }
 
 main.mdl-layout__content{
   padding-bottom: 50px;
-}
-
-a {
-  color: var(--accent-blue);
 }
 
 input::placeholder ,textarea::placeholder  { 
@@ -80,7 +96,6 @@ footer.mdl-mini-footer{
 
 form{
   margin: 20px;
-
 }
 
 img.user-avatar{
@@ -95,15 +110,16 @@ img.user-avatar{
 }
 
 nav.mdl-navigation a.mdl-navigation__link i{
-  padding: 0px 8px 0 0;
+  padding: 0px 8px 4px 0;
 }
 
 nav.mdl-navigation a.nav-panel{
   padding: 0px 10px 0 0;
-  font-weight: bolder;
+  font-weight: regular;
   text-transform: uppercase;
   font-size: 1.25em;
   color: black;
+  opacity: 1;
 }
 
 @media (min-width: 480px){
@@ -253,3 +269,4 @@ div.mdl-textfield.pin_labels > span{
   background:var(--accent-blue);
   width: 100%;
 }
+
