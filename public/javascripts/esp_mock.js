@@ -29,6 +29,7 @@ let samplingFrequency;
 let esp_mac = "22:44:66:88:11:33:55"; //"00:11:22:33:44:55:66:77";  //"00:25:96:FF:FE:12:34:56";
 
 function init() {
+  
   let ipstr = $("#serverip").data("ip");
   if(ipstr)
     wsUri = "ws://"+ipstr+":3000";
@@ -59,6 +60,10 @@ function printWifiStatus(){
 
 function initWebsocket(){
   websocket = new WebSocket(wsUri);
+  window.addEventListener('beforeunload', function(event) {
+    //do something here
+    websocket.close();
+  }, false);
   webSocketEvent();
 }
 

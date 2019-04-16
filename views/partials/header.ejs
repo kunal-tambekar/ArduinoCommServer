@@ -37,9 +37,12 @@
       <a class="mdl-navigation__link nav-panel" href="/about">
         <i class="mdl-color-text--accent material-icons" role="presentation">info</i> About
       </a>
-      <a class="mdl-navigation__link" href="/mock_esp" target="external">
-        <i class="mdl-color-text--accent material-icons" role="presentation">block</i> Mock ESP
+      <a class="mdl-navigation__link nav-panel" href="#" onClick="(function(){ window.open('http://'+window.location.hostname+':3001'); return false; })();return false;" target="external">
+        <i class="mdl-color-text--accent material-icons" role="presentation">cloud_download</i> OTA
       </a>
+      <!-- <a class="mdl-navigation__link" href="/mock_esp" target="external">
+        <i class="mdl-color-text--accent material-icons" role="presentation">block</i> Mock ESP
+      </a> -->
     </nav>
   </div>
   <div role="button" tabindex="0" class="mdl-layout__drawer-button">

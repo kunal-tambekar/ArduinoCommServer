@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var db = require('./database');
+const wsserver = require('./wsserver');
 const url = require('url');
 
 /* GET api base url. */
@@ -174,6 +175,7 @@ router.post('/esp/modify',function(req,res){
 router.post('/esp/configure',function(req,res){
   console.log(JSON.stringify(req.body));
   db.upsertConfiguration(req.body,(result)=>{
+    wsserver.triggerEspEvent(req.body.mac,8);
     console.log("SUCCESS: "+JSON.stringify(result));
     // db.updateEspWithMac({mac:req.body.mac},{mac:req.body.mac, status:1},(r)=>{
       res.location("../../esp");
@@ -196,11 +198,27 @@ router.get("/esp/delete/:mac",function(req,res){
     });
 });
 
+router.get("/esp/push_ota",function(req,res){
+  let mac = req.query.mac;
+  wsserver.triggerEspEvent(mac,12);
+  res.send({status:200});
+});
+
 
 /* DATA */
 
+router.get('/datafields',function(req,res){
+  let mac = req.query.mac;
+  db.getEspDataFields(mac,(data)=>{
+    res.send(JSON.stringify(data));
+  },e=>{
+    res.send(JSON.stringify(e));
+  });
+});
+
 router.post('/data',function(req,res){
   
+  console.log(JSON.stringify(req.body));
   let pno=parseInt(req.body.page);
   let count = parseInt(req.body.page_size);
   let param =  req.body.parameter;
@@ -210,22 +228,22 @@ router.post('/data',function(req,res){
   console.log("MAC= "+mac+"  Page= "+pno+" PageSize= "+count+" PARAMETER = "+param );
   db.getEspDataPagewise(mac,param,pno,count,result =>{
     // temp dummy data 
-    result = [{
-      "timestamp": 1547179009000,
-      "value": (Math.floor(Math.random() * 200) - 100)
-    },{
-      "timestamp": 1547179119000,
-      "value": (Math.floor(Math.random() * 200) - 100)
-    },{
-      "timestamp": 1547179229000,
-      "value": (Math.floor(Math.random() * 200) - 100)
-    },{
-      "timestamp": 1547179339000,
-      "value": (Math.floor(Math.random() * 200) - 100)
-    },{
-      "timestamp": 1547179449000,
-      "value": (Math.floor(Math.random() * 200) - 100)
-    }];
+    // result = [{
+    //   "timestamp": 1547179009000,
+    //   "value": (Math.floor(Math.random() * 200) - 100)
+    // },{
+    //   "timestamp": 1547179119000,
+    //   "value": (Math.floor(Math.random() * 200) - 100)
+    // },{
+    //   "timestamp": 1547179229000,
+    //   "value": (Math.floor(Math.random() * 200) - 100)
+    // },{
+    //   "timestamp": 1547179339000,
+    //   "value": (Math.floor(Math.random() * 200) - 100)
+    // },{
+    //   "timestamp": 1547179449000,
+    //   "value": (Math.floor(Math.random() * 200) - 100)
+    // }];
     
   
     res.json(result);

@@ -41,7 +41,7 @@ router.get('/configure', function(req, res, next) {
     esp=>{
       db.getAllSensorNames(
         sensors=>{
-          db.getConfigurationByEspId(req.query.mac,
+          db.getConfigurationByEspId(req.query.mac,0,
             config=>{
               console.log("CONFIG: "+JSON.stringify(config))
               res.render('esp_configure',{title:'CONFIGURE ESP', esp : esp ,config:(config?config:""), sensors});

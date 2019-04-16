@@ -1,6 +1,14 @@
 #ifndef __ESPMODULEBASE_H__
 #define __ESPMODULEBASE_H__
 
+#if ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+  #include "pins_arduino.h"
+  #include "WConstants.h"
+#endif
+
 // #include <WiFi.h>
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>
@@ -17,25 +25,24 @@
 typedef enum{
   
   /* state from ESPBootstrap library */
-  STATE_READY,                  
-	STATE_WIFI_CONNECT,           
-	STATE_WIFI_ACTIVE,            
-	STATE_ACCESS_POINT_CONNECT,   
-	STATE_ACCESS_POINT_ACTIVE,    
-	STATE_SLEEP,                  
+  STATE_READY,                  //0 
+	STATE_WIFI_CONNECT,           //1 
+	STATE_WIFI_ACTIVE,            //2 
+	STATE_ACCESS_POINT_CONNECT,   //3 
+	STATE_ACCESS_POINT_ACTIVE,    //4 
+	STATE_SLEEP,                  //5 
 
   /* ESP specific states */
-  STATE_BOOTING,
-  STATE_REQUEST_CONFIG,
-  STATE_RESPONSE_CONFIG_DETAILS,
-  STATE_CONFIG_UPDATED,
-  STATE_ACTIVE,
-  // STATE_PASSIVE,  // if ESP is to be kept idle but connected to WiFi
-  STATE_ONLINE,
-  STATE_OFFLINE,
-  STATE_OTA_AVAILABLE,
-  STATE_INIT_OTA
+  STATE_BOOTED,                 //6
+  STATE_REQUEST_CONFIG,         //7 
+  STATE_RESPONSE_CONFIG_DETAILS,//8 : used by server
+  STATE_ACTIVE,                 //9
+  STATE_PASSIVE,                //10: if ESP is to be kept idle but connected to WiFi [Future Scope]
+  STATE_OTA_AVAILABLE,          //11
+  STATE_INIT_OTA                //12
 
+  // STATE_DATA_RECORD = 100 // used to notify that ESP is sending data to store on server
+  // STATE_DATA_ACK = 101 // Acknowledgement sent by server indicating data received
 
 } ESPState;
 
@@ -43,24 +50,31 @@ typedef enum{
 class ESPModuleBase{
   private:
   
-          char* _esp_mac;
+          char* espMac;
 
-          char* _ap_ssid;
-		      char* _ap_password;
+          char* apSsid;
+		      char* apPassword;
 
+          ESP8266WiFiMulti WiFiMulti;
           WebSocketsClient webSocket;
 
-          char* _server_host;
-          char* _server_url;
-		      char* _server_port;
+          char* serverHost;
+          char* serverUrl;
+		      char* serverPort;
 
-          char* _ota_server_host_url;
-		      char* _ota_server_port;
+          char* otaServerHostUrl;
+		      char* otaServerPort;
 
           int samplingFrequency;
-          int _num_of_pins;
-          SensorBase* _sensors;
+          int numOfPins;
+          int* espPinNumbers;
+          SensorBase* sensors;
           ESPState state;
+          ESPState nextState;
+
+          // variables for timer
+          unsigned long startMillis;
+          unsigned long currentMillis;
 
   public:
           ESPModuleBase();
@@ -77,6 +91,23 @@ class ESPModuleBase{
 
           void webSocketEvent(WStype_t type, uint8_t * payload, size_t length);
           void initWebsocket();
+
+          boolean begin();
+          void readAndSendData(); // USER DEFINES THIS if else conditions
+          virtual void setupESP();
+          void loopEvent(); // read data based on sampling freq
+
+          inline boolean cycleComplete(){
+            currentMillis = millis();  //get the current "time"
+            if (currentMillis - startMillis >= samplingFrequency*1000)  //test whether the period has elapsed
+            {
+              //if so, record reading
+              readAndSendData();
+              
+              //IMPORTANT to update the start time of the moment recording was done.
+              startMillis = currentMillis;  
+            }
+          }
 
 };
 

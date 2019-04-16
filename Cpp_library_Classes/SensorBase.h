@@ -2,7 +2,14 @@
 #ifndef __SENSORBASE_H__
 #define __SENSORBASE_H__
 
-#include "Arduino.h"
+#if ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+  #include "pins_arduino.h"
+  #include "WConstants.h"
+#endif
+
 #include <ArduinoJson.h>
 #include "FS.h"
 
@@ -17,22 +24,28 @@
 
 class SensorBase{
   protected:
-   char* modelType;
-   int numOfPins; 
-   String pinLabels[]; 
-
+    // store the model type
+    char* modelType;
+    // store if its a sensor or an actuator
+    // 0 : "actuator" | 1 : "sensor"
+    int category;
+    // number of pins to connect to ESP 
+    int numOfPins; 
+    // labels of the pins to map with the ESP pin number
+    string pinLabels; 
+    byte pins[];
   public: 
   
-  SensorBase(){};
-  ~SensorBase(){};
-
-  void initialize();
-  void readData();
-  void sendData();
-
-
-
-
+    SensorBase(){};
+    ~SensorBase(){};
+    // use to initialize and configure the sensor or actuator
+    void init();
+    // user shall call this function in ESP sketch to trigger recording of reading/data
+    string readAndSendData();
+    // user shall modify this function to send data to server
+      // JSON string customization in control of user 
+      //NOT needed
+    void sendData();
 
 };
 

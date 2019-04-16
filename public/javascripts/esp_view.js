@@ -9,26 +9,28 @@ var config = {
       borderColor: window.chartColors.red,
       fill: false,
       spanGaps :true,
-      data: [{
-        x: newDateString(0),
-        y: randomScalingFactor()
-      }, {
-        x: newDateString(2),
-        y: randomScalingFactor()
-      }, {
-        x: newDateString(4),
-        y: null
-      }, {
-        x: newDateString(5),
-        y: randomScalingFactor()
-      }],
+      data: [
+      //   {
+      //   x: newDateString(0),
+      //   y: randomScalingFactor()
+      // }, {
+      //   x: newDateString(2),
+      //   y: randomScalingFactor()
+      // }, {
+      //   x: newDateString(4),
+      //   y: null
+      // }, {
+      //   x: newDateString(5),
+      //   y: randomScalingFactor()
+      // }
+    ],
     }]
   },
   options: {
     responsive: true,
     title: {
       display: true,
-      text: 'Displaying TEMPERATURE data'
+      text: 'Select the value to display and parameters to view data >>>'
     },
     scales: {
       xAxes: [{
@@ -36,7 +38,7 @@ var config = {
         display: true,
         scaleLabel: {
           display: true,
-          labelString: 'Date'
+          labelString: 'Time'
         },
         ticks: {
           major: {
@@ -73,10 +75,13 @@ $('#fetchData').on('click', function() {
   console.log(config.data.datasets);
   console.log("Page: "+pg+" Size: "+size+" Parameter: "+par+" MAC: "+mac);
   $.post( "../api/data", body,function( data ) {
+    config.data.datasets[0].label = par.toUpperCase()+" data";
     config.data.datasets[0].data = [];
     data.forEach(obj=>{
       config.data.datasets[0].data.push({x:obj.timestamp,y:obj.value});
     });
+    
+    config.options.scales.yAxes[0].scaleLabel.labelString = par.toUpperCase();
     //  = [{x:0,y:0},{x:10,y:-10},{x:20,y:20},{x:30,y:-30},{x:40,y:40},{x:50,y:-50}]
     window.myLine.update();
   });

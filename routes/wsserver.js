@@ -3,35 +3,102 @@ const url = require('url');
 var db = require('./database');
 const constants = require('./constants');
 
+// class to store websocket connections for each device
+// NOTE: since there is only one ESP module per websocket thus 1:1 mapping with MAC will work fine
+class Clients{
+
+  constructor(){
+    this.clientList = {};
+    this.saveClient = this.saveClient.bind(this);
+    this.removeClient = this.removeClient.bind(this);
+  }
+  
+  // connect on device ON
+  saveClient(mac,ws){
+    this.clientList[mac] = (ws);
+  }
+
+  // remove from map if device WS closes due to some reason
+  removeClient(mac){
+    this.clientList[mac] = null;
+  }
+  
+}
+
+const espObserverMap = new Clients();
+
+// Use this to trigger immediate effect on ESP
+exports.triggerEspEvent = function(mac,code){
+ 
+  if(code==8){
+    db.getConfigurationByEspId(mac,0,
+      configJson=>{
+        console.log("Called triggerEspEvent for ESP with mac address: "+mac);
+        console.log("SERVER to ESP >>> websockets >>> UPADTED CONFIG: "+JSON.stringify(configJson));
+        // Editing response before sending it to ESP.
+        configJson.state = 8;
+        configJson.code = 10;
+        delete configJson._id;
+        delete configJson.mac;
+        delete configJson.model_type;
+        delete configJson.num_of_pins;
+        delete configJson.pin_label;
+        
+        if(espObserverMap.clientList[mac]){
+          espObserverMap.clientList[mac].send(JSON.stringify(configJson));
+        }
+      },e=>{
+      res.send("ESP CONFIGURE JS ERROR while fetching ESP config :"+ JSON.stringify(e));
+    });
+  }else if(code == 12){
+    if(espObserverMap.clientList[mac]){
+      console.log("sent OTA TRIGGER to ESP ");
+      espObserverMap.clientList[mac].send("{'state':11}");      
+    }
+  }else{
+    console.log("WS SERVER: UNKNOWN EVENT = "+code +" TRIGERRED.");
+  }
+
+}
+
 exports.initWebSocketServer = function (server) {
+ 
   const wss = new WebSocket.Server({
     server
   });
 
   wss.on('connection', function connection(ws, req) {
     const location = url.parse(req.url, true);
-
+    let mac ="";
     ws.on('message', function incoming(message) {
+      
       var msg={};
       try{
         msg = JSON.parse(message);
       }catch(excp){
-        console.warn("non JSON data received: "+message);
+        console.warn("WARNING !!! non JSON data received: "+message);
       }
-      // message is from ESP
+      // Manage ESP WS connections via Map like structure: 
+      // Add ws to map with MAC as key Map<mac,ws>
+      mac = msg.mac;
+      espObserverMap.saveClient(msg.mac,ws);
+
+      // Handle message from ESP
       if(msg){  
         console.log("ESP Message : " + JSON.stringify(msg));
         //ESP requested config from server
         if (msg.code == constants.STATE_REQUEST_CONFIG) { 
           console.log("Configuration Request received");
           //check if ESP config is present in based on MAC address
-          // IF Yes : change status to CONFIGURED and check config table for configurations info to send back
-          
+          // IF Yes : check config table for configurations info to send back
+          var ip = req.connection.remoteAddress.split(":");
+          ip = ip[ip.length-1];
+
           db.getEspByMac(msg.mac,function(doc){
-              if(doc.mac === msg.mac){
+              if(doc && doc.mac === msg.mac){
                 console.log("Found info in ESP_collection, looking for configuration "+doc.status+":"+doc.mac);
                 if( doc.status == constants.ESP_CONFIGURED){
-                  db.getConfigurationByEspId(doc.mac,function(conf){
+                  db.getConfigurationByEspId(doc.mac,1,function(conf){
                     conf.state=constants.STATE_RESPONSE_CONFIG_DETAILS;
                     conf.code = constants.STATE_ACTIVE; // default to Active
                     ws.send(JSON.stringify(conf));
@@ -41,11 +108,13 @@ exports.initWebSocketServer = function (server) {
                 }else{
                   console.log(msg.mac+" not yet configured");
                 }
-                // ELSE No: Add the ESP to the espDB and make it configured [unconfigured]
+          // ELSE No: Add the ESP to the esp_collection and make it configured status as [unconfigured]
               }else{
+                // Creating new entry with Wifi Mac address of ESP8266
                 let newEsp = {
                   "mac":msg.mac,
-                  "ip":msg.ip,
+                  // IP from request to server [not much use but for keep sake]
+                  "ip":ip,
                   "status":0,
                   "name":"ESP_"+msg.mac,
                   "description":"Newly added unconfigured ESP",
@@ -56,7 +125,7 @@ exports.initWebSocketServer = function (server) {
                 db.upsertEsp(newEsp,function(doc){
                   console.log("Added new esp to esp_collection as unconfigured: "+msg.mac);
                 },er=>{
-                  console.warn("Error while adding to ESP_collection: "+er);
+                  console.warn("Error while adding to esp_collection: "+er);
                 });
               }
                 
@@ -65,11 +134,21 @@ exports.initWebSocketServer = function (server) {
           });
           
         // ESP send data to server
-        } else if( msg.code == constants.STATE_ACTIVE ){
+        } else if( msg.code == constants.STATE_RECORD_DATA ){
           // Take the data and enter into the data_collection
-          // NOTE : remember to create a trigger for pushing new values to all clients
-          
+          db.insertSensorData(msg,result =>{
+            
+            if(espObserverMap.clientList[mac]){
+              console.log("SAVED data in data_collection "+result);
+              // Optional TODO: can send ACK to ESP about received data
+              espObserverMap.clientList[mac].send("{'state':13}");
+              
+            }
 
+          },e=>{
+            res.send("JS ERROR while storing sensor data from ESP to db :"+ JSON.stringify(e));
+          });
+          
 
         }else {
 
@@ -101,26 +180,18 @@ exports.initWebSocketServer = function (server) {
       //   console.log("Unknown request received >> " + msg.code);
       }
 
-      
-      console.log('Server received: %s from ' + message + ' with IP %s', msg.code, req.connection.remoteAddress);
+      console.log('Server received code: %s from ' + message + ' with IP %s', ip, req.connection.remoteAddress);
 
     });
 
     ws.on('error', function errCloseConnection(error) {
-      console.log("There was an " + error);
-      // espObserverMap.delete(ws);
-
-      var pos = dashboardList.indexOf(ws);
-      dashboardList.splice(pos, 1);
+      espObserverMap.removeClient(mac);
+      console.log("WS ERROR: " + error +" for MAC: "+mac);
     });
 
     ws.on('close', function closeConnection() {
-      // if (msg!=undefined && msg.code == "STOP_SEND_DATA") {
-      //     // remove the WS from the Map and pass the same message tot the ESP as well
-      // }
-
-      // console.log('DISCONNECT: Removing ' + espObserverMap.get(ws) + ' from espObserverMap whose ip was' + req.connection.remoteAddress);
-      // espObserverMap.delete(ws);
+      espObserverMap.removeClient(mac);
+      console.log('WS DISCONNECT: ' + mac + ' disconnected from ESP WS Server whose ip was ' + req.connection.remoteAddress);
     });
 
   });

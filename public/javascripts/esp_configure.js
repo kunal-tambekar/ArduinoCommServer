@@ -40,5 +40,12 @@ $(function () {
     }
   });
 
+  $("#btnInitOTA").on("click",(ev)=>{
+    let mac = $("#mac").val();
+    $.getJSON( "../api/esp/push_ota?mac="+mac, function( data ) {
+
+    });
+  });
+
 
 });

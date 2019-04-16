@@ -20,8 +20,7 @@
       <div class="mdl-card__media" style="height:3px; background: var(--accent-green);">
       </div>
       <div class="mdl-card__title">
-        <h5 class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;">NO
-          DATA FOUND</h5>
+        <h5 class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;"><%= esp.mac %></h5>
       </div>
       <div class="mdl-card__title">
         <h6 class="mdl-card__title-text" style="width:100%; font-size: 18px; color: grey; display:inline; text-align: center;">No
@@ -39,11 +38,10 @@
       <div class="border-rc mdl-card mdl-shadow--4dp mdl-cell--4-col-phone mdl-cell--8-col-tablet  mdl-cell--3-col-desktop"
         style="float: right; margin: 8px;">
         <div class="mdl-card__title">
-          <h5 id="eid" data-mac="<%= esp.mac %>" class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;">NO
-            DATA FOUND</h5>
+          <h5 id="eid" data-mac="<%= esp.mac %>" class="mdl-card__title-text" style="width:100%; display:inline;  font-size: 26px; text-align: center;"><%= esp.mac %></h5>
         </div>
         <div class="mdl-card__title">
-          <h6 class="mdl-card__title-text" style="width:100%; font-size: 18px; color: grey; display:inline; text-align: center;">No
+          <h6 class="mdl-card__title-text" style="width:100%; font-size: 18px; color: grey; display:inline; text-align: center;">Displaying
             data collected from sensors attached to the ESP with MAC Address [<%= esp.mac %>]</h6>
         </div>
         <div style="float: left;">
@@ -69,8 +67,10 @@
 
               <select class="mdl-textfield__input" id='parameter' hint='select number of results to view on graph'
                 data-required=true style="margin-top:4px; ">
-                <option value="TEMPERATURE" <% if(data.page_size=="TEMPERATURE"){ %> selected <% }%> >TEMPERATURE</option>
-                <option value="HUMIDITY" <% if(data.page_size=="HUMIDITY"){ %> selected <% }%> >HUMIDITY</option>
+                <option value="pressed" <% if(data.page_size=="pressed"){ %> selected <% }%> >PRESSED</option>
+                <option value="power" <% if(data.page_size=="power"){ %> selected <% }%> >POWER</option>
+                <option value="temperature" <% if(data.page_size=="temperature"){ %> selected <% }%> >TEMPERATURE</option>
+                <option value="humidity" <% if(data.page_size=="humidity"){ %> selected <% }%> >HUMIDITY</option>
               </select>
             </div>
         </div>
@@ -82,7 +82,7 @@
           </span>
         </button>
         <br>
-        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" id="randomizeData" 
+        <!-- <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--accent esp-card-button" id="randomizeData" 
         style="background:var(--accent-green); color:black;" data-upgraded=",MaterialButton,MaterialRipple">Randomize Data
           <span class="mdl-button__ripple-container">
             <span class="mdl-ripple"></span>
@@ -90,7 +90,7 @@
         </button>
 
         <button id="addData">Add Data</button>
-        <button id="removeData">Remove Data</button>
+        <button id="removeData">Remove Data</button> -->
       </div>
     </div>
     <%}%>

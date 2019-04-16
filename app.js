@@ -94,7 +94,7 @@ server.listen(3000,function listening(){
   console.log("ArduinoComm Listening on port "+server.address().port);
 });
 
-sioserver.initSocketioServer(server);
+// sioserver.initSocketioServer(server);
 wsserver.initWebSocketServer(server);
 
 module.exports = app;

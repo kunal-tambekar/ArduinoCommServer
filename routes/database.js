@@ -388,12 +388,21 @@ exports.updateConfigurationById = function (mac, conf, succ, fail) {
     });
 }
 
-exports.getConfigurationByEspId = function (eid, succ, fail) {
+exports.getConfigurationByEspId = function (eid,forESP, succ, fail) {
     //eid is mac
+    let filter = {};
+    if(forESP){
+        filter = {
+            fields: {
+                _id: 0, mac:0,model_type: 0,num_of_pins:0,pin_label:0
+                
+            }
+        };
+    }
     var collection = db.get('configuration_collection');
     collection.findOne({
         mac: eid
-    }, {}, function (err, doc) {
+    }, filter, function (err, doc) {
         if (err === null) {
             succ(doc);
         } else {
@@ -405,9 +414,45 @@ exports.getConfigurationByEspId = function (eid, succ, fail) {
 /* DATA */
 exports.insertSensorData = function (obj, succ, fail) {
     // obj contains data collected from the ESP's sensors
+
+    /* RECEIVED FORMAT (JSON Object): 
+        { "mac": "60:01:94:5D:97:72",
+            "timestamp": 1543988228,
+            "data":{"pressed" :1, "power" : 1} 
+        } 
+
+      Need to convert to REQUIRED FORMAT (JSON Array): 
+        [ {"esp_id": "60:01:94:5D:97:72",
+            "timestamp": 1543988228,
+            "parameter": "POWER",
+            "value": 1
+          },
+          {"esp_id": "60:01:94:5D:97:72",
+            "timestamp": 1543988228,
+            "parameter": "PRESSED",
+            "value": 1
+          }
+        ]
+    */
     var collection = db.get('data_collection');
-    obj.timestamp = utils.getTimestamp();
-    collection.insert(obj, function (err, result) {
+    // obj.timestamp = utils.getTimestamp();
+
+    var jsonArr = [];
+    if((Object.keys(obj.data).length !== 0 && obj.constructor === Object)){
+        for (var key in obj.data) {
+            var entry = {};
+            entry.esp_id = obj.mac;
+            entry.timestamp = utils.getTimestamp();
+
+            if (obj.data.hasOwnProperty(key)) {
+                entry.parameter = key;
+                entry.value = obj.data[key];
+                jsonArr.push(entry);
+            }
+        }
+    }
+
+    collection.insert(jsonArr, function (err, result) {
         if (err === null) {
             succ(result);
         } else {
@@ -438,14 +483,27 @@ exports.getSensorDataByEspId = function (eid, page, size, param, succ, fail) {
         });
 }
 
+exports.getEspDataFields = function (eid, succ, fail) {
+    var collection = db.get('data_collection');
+    collection.distinct("parameter",{
+        esp_id: eid
+    }, function (err, data) {
+        if (err === null) {
+            succ(data);
+        } else {
+            fail(err);
+        }
+    });
+}
+
 exports.getEspDataPagewise = function (eid, param, page, size, succ, fail) {
     var collection = db.get('data_collection');
     collection.find({
-        mac: eid,
+        esp_id: eid,
         parameter: param
     }, {
         sort: {
-            timestamp: 1
+            timestamp: -1
         },
         limit: size,
         skip: (page - 1) * size
