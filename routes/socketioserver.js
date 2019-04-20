@@ -1,5 +1,6 @@
 const socketio = require("socket.io");
 
+// Setup and use if socket io is to be used for client side
 exports.initSocketioServer = function(server){
   const io = socketio(server);
   console.log("Socket IO server initialized");

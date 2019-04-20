@@ -1,5 +1,6 @@
 'use strict';
 
+// predefined colors for use in charts
 window.chartColors = {
 	red: 'rgb(255, 99, 132)',
 	orange: 'rgb(255, 159, 64)',
@@ -10,6 +11,7 @@ window.chartColors = {
 	grey: 'rgb(201, 203, 207)'
 };
 
+// Util function for dates on graph
 (function(global) {
 	var Months = ['January','February','March','April','May','June','July',
 		            'August','September','October','November','December' ];

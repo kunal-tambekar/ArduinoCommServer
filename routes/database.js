@@ -241,9 +241,9 @@ exports.getAllEsps = function (filter, succ, fail) {
     if (filter === null || filter === undefined) {
         fltr = {};
     } else {
-        // 0 uncongifured ; 1 online ; 2 offline
+        // 0 uncongifured ; 1 configures ; 2 ota available [not used]
         fltr = {
-            status: filter
+            status: filter%2
         };
     }
     collection.find(fltr, {
@@ -329,7 +329,6 @@ exports.getEspCount = function (succ, fail) {
 exports.upsertConfiguration = function (obj, succ, fail) {
 
     var collection = db.get('configuration_collection');
-    // collection.insert(obj, function (err, result) {
     collection.update({
         mac: obj.mac
     }, obj, {
@@ -351,7 +350,6 @@ exports.upsertConfiguration = function (obj, succ, fail) {
                     fail(e);
                 }
             });
-            // succ(result);
         } else {
             fail(err);
         }
@@ -435,7 +433,6 @@ exports.insertSensorData = function (obj, succ, fail) {
         ]
     */
     var collection = db.get('data_collection');
-    // obj.timestamp = utils.getTimestamp();
 
     var jsonArr = [];
     if((Object.keys(obj.data).length !== 0 && obj.constructor === Object)){
@@ -462,14 +459,14 @@ exports.insertSensorData = function (obj, succ, fail) {
 }
 
 exports.getSensorDataByEspId = function (eid, page, size, param, succ, fail) {
-    //eid is mac
+    //eid is mac addr
     var collection = db.get('data_collection');
     collection.find({
             mac: eid,
             parameter: param
         }, {
             sort: {
-                timestamp: 1
+                timestamp: -1
             },
             limit: size,
             skip: (page - 1) * size

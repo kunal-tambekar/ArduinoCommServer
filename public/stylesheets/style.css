@@ -1,12 +1,13 @@
 :root{
   --zoom-scale:0.9;
-  /* --accent-green:rgb(139,195,74);  */
+  /* --accent-green:rgb(139,195,74); // RGB values of color below  */
   --accent-green:#8BC34A; 
   --accent-blue: #00B7FF;
 }
 html{
   zoom:var(--zoom-scale);
 }
+/* Uncomment below style if you want a little zoomed out view*/
 /* @media  (min-width: 1025px){
   html{
     zoom:0.85;
@@ -17,6 +18,7 @@ body {
   padding: 0px;
   height: 100%;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  /* Uncomment below style if you want background Image for web page */
   /* background-image: url('../images/bg.jpg'); */
   background-size: 100%;
   background-color: #efefef;
@@ -36,13 +38,6 @@ body .mdl-layout__header-row a.mdl-navigation__link:hover{
   text-decoration: underline;
   font-style: italic;
 }
-
- /* div.chartjs-size-monitor { 
-  max-width: 65%;
-}
-canvas {
-  max-width: 98%;
-} */
 
 a {
   color: var(--accent-blue);

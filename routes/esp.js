@@ -8,9 +8,9 @@ router.get('/', function(req, res) {
 
 router.get('/home', function(req, res, next) {
   let filter=null;
-  // filter by Status 0 - unconfigured ; 1 - Online ; 2 - Offline
+  // filter by Status 0 - unconfigured ; 1 - Configured ; 2 - OTA available [not used]
   if(req.query.filter && Number.isInteger(Number.parseInt(req.query.filter))){
-    filter = req.query.filter % 2;
+    filter = req.query.filter;
   }
 
   db.getAllEsps(filter,result=>{

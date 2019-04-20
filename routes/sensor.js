@@ -8,8 +8,13 @@ router.get('/', function(req, res) {
 });
 router.get('/home', function(req, res, next) {
   let sort=0;
-  // 0 - sort by name ascending ; 1 sort by name desc ; 2 sort by model_type asc ; 3 sort by model_type desc 
-  // 4 - category + name asc
+  /*
+    0 sort by name ascending ; 
+    1 sort by name desc ; 
+    2 sort by model_type asc ; 
+    3 sort by model_type desc 
+    4 category + name asc 
+  */
   if(req.query.sort && Number.isInteger(Number.parseInt(req.query.sort))){
     sort = req.query.sort % 5;
   }

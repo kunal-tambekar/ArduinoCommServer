@@ -2,11 +2,4 @@
 // all functions need to be implemented in the derived class
 
 #include "SensorBase.h"
-
-SensorBase::SensorBase(){ }
-
-SensorBase::~SensorBase(){ }
-
-virtual void init() = 0;
-
-virtual string SensorBase::readAndSendData()=0;
+#include "Arduino.h"

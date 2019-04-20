@@ -4,30 +4,35 @@
 //include any required classes here along with SensorBase
 #include <dht.h>
 #include "SensorBase.h"
+#include <Arduino.h>
 
 //NOTE: not all sensor implementaions may need CPP file
 
-class DHT11Sensor : public DHT11Sensor{
+class DHT11Sensor : public SensorBase{
     public:
-        inline DHT11Sensor( byte connectionPin ) { 
+        inline DHT11Sensor( byte signalPin ) {
             modelType = "DHT11";
             category = 1;
             numOfPins = 1; 
-            pinLabels =  new string[1] {"SIGNAL"}; 
-            pins = new byte[1] { connectionPin };
+            pinLabels =  new String[1] {"SIGNAL"};
+            pins = new byte[1] { signalPin };
 
             init(); // might as well be skipped
         }
 
-        inline void init(){ /* do nothing as  DHT library handles initialization  */ }
+        void init(){ /* do nothing here as DHT library handles initialization  */ }
 
-        inline string readAndSendData(){
+        String readAndSendData(){
             // Read data and creat json response
-            int sts = DHT.read11(dhtPin);
-            switch (sts)
-            {
-                case DHTLIB_OK:  
-                    Serial.print("OK,\t"); 
+            int sts = DHT.read11(pins[0]);
+            String jsonStr = "";
+            switch (sts) {
+                case DHTLIB_OK: {
+                        Serial.print("OK,\t");
+                        String h = String(DHT.humidity, DEC);
+                        String t = String(DHT.temperature, DEC);
+                        jsonStr += "\"humidity\": " + h + ", \"temperature\": " + t + "";
+                    }
                     break;
                 case DHTLIB_ERROR_CHECKSUM: 
                     Serial.print("Checksum error,\t"); 
@@ -39,7 +44,7 @@ class DHT11Sensor : public DHT11Sensor{
                     Serial.print("Unknown error,\t"); 
                     break;
             }
-            string jsonStr =  "{\"humidity\": "+DHT.humidity+", \"temperature\": "+ DHT.temperature +" }";
+
             return jsonStr;
         }
         

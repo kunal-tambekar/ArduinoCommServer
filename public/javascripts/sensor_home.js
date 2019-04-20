@@ -3,7 +3,7 @@ function deleteSensor(e) {
   var del = confirm("Are you sure you want to delete this sensor [Model type: " + modelType + " ]?");
     
   if(del) {
-    var durl = 'http://localhost:3000/api/sensor/delete/' + modelType;
+    var durl = 'http://'+window.location.hostname+':3000/api/sensor/delete/' + modelType;
     $.get( durl,
       function (data) {
         window.open("../../../sensor","_self");

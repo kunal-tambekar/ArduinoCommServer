@@ -22,7 +22,7 @@ const STATE_OFFLINE =13;
 const STATE_OTA_AVAILABLE =14;
 const STATE_INIT_OTA =15;
 
-let wsUri = "ws://localhost:3000";  // "ws://10.0.0.54:3000";
+let wsUri = "ws://"+window.location.hostname+":3000";
 let output_console;
 let espState = STATE_BOOTING;
 let samplingFrequency;

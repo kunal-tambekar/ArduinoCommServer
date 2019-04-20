@@ -32,9 +32,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // enabling cross origin resource sharing, so that any domain can access the APIs
 app.use(cors());
 
-app.get('/socketiotest', function(req, res){
-  res.sendFile(__dirname + '/tests/sockiotest.html');
-});
 
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
@@ -65,10 +62,13 @@ for (var k in interfaces) {
 app.serverip = addresses;
 console.log(app.serverip);
 
+// set up mockers for testing
 app.use('/mock_esp', function(req, res, next) {
   res.render('esp_mock', { server: {ip : app.serverip} });
 });
-
+app.get('/socketiotest', function(req, res){
+  res.sendFile(__dirname + '/tests/sockiotest.html');
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -94,7 +94,7 @@ server.listen(3000,function listening(){
   console.log("ArduinoComm Listening on port "+server.address().port);
 });
 
-// sioserver.initSocketioServer(server);
+// sioserver.initSocketioServer(server); // not used
 wsserver.initWebSocketServer(server);
 
 module.exports = app;
