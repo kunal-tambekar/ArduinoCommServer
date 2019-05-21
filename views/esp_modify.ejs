@@ -61,13 +61,18 @@
           <span style="top:4px; font-size:12px; color:var(--accent-green)">Enter pin labels below: </span>
           <div id="pins_layout" class="mdl-grid" style="margin: 0 4px 0 -8px;">
               
-            <%if(esp.num_of_pins>0) { esp.pin_label.forEach(function(el, index) { %>
+            <%if(esp.num_of_pins>0) { esp.pins.forEach(function(el, index) { %>
               <div class='mdl-cell--4-col mdl-cell--3-col-desktop border-rc m2'>
                 <div class='mdl-textfield mdl-js-textfield pin_labels'>
-                  <span style="top:4px; font-size:10px;"> Pin Label: </span>
+                  <span style="top:4px; font-size:10px;"> Pin label: </span>
                   <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='e.g.: GPIO_02' 
-                    title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pin_label[index] %>" data-required=true>
-                  </div>
+                    title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pins[index].pin_label %>" data-required=true>
+                </div>
+                <div class='mdl-textfield mdl-js-textfield pin_labels'>
+                  <span style="top:4px; font-size:10px;"> Pin number: </span>
+                  <input class='mdl-textfield__input' type='text' pattern='-?^[0-9]*?' placeholder='e.g.: 2' 
+                    title="Use numbers only !" name='pin_num' value="<%= esp.pins[index].pin_num %>" data-required=true>
+                </div>
               </div>
             <% }); }%>
           </div>

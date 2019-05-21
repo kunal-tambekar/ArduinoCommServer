@@ -44,7 +44,7 @@ router.get('/configure', function(req, res, next) {
           db.getConfigurationByEspId(req.query.mac,0,
             config=>{
               console.log("CONFIG: "+JSON.stringify(config))
-              res.render('esp_configure',{title:'CONFIGURE ESP', esp : esp ,config:(config?config:""), sensors});
+              res.render('esp_configure',{title:'CONFIGURE ESP', esp : esp ,config:(config?config:""), sensors: sensors});
             },e=>{
             res.send("ESP CONFIGURE JS ERROR while fetching ESP config :"+ JSON.stringify(e));
           })

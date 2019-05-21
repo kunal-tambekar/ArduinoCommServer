@@ -119,7 +119,16 @@ exports.initWebSocketServer = function (server) {
                   "description":"Newly added unconfigured ESP",
                   "model_type":"ESP8266",
                   "num_of_pins":2,
-                  "pin_label" : [ "GPIO_0", "GPIO_2" ],
+                  "pins" : [
+                      {
+                          "pin_label" : "GPIO_0",
+                          "pin_num" : "0"
+                      },
+                      {
+                          "pin_label" : "GPIO_2",
+                          "pin_num" : "2"
+                      }
+                  ]
                 };
                 db.upsertEsp(newEsp,function(doc){
                   console.log("Added new esp to esp_collection as unconfigured: "+msg.mac);
@@ -127,7 +136,7 @@ exports.initWebSocketServer = function (server) {
                   console.warn("Error while adding to esp_collection: "+er);
                 });
               }
-                
+
             },(err)=>{
               console.warn(err);
           });

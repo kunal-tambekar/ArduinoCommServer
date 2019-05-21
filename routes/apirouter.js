@@ -156,10 +156,27 @@ router.post('/esp/add',function(req,res){
   console.log(JSON.stringify(req.body));
   if(req.body.num_of_pins === "1"){
     let lbl = req.body.pin_label;
+    let num = req.body.pin_num;
     req.body.pin_label = [];
+    req.body.pin_num = [];
     req.body.pin_label.push(lbl);
+    req.body.pin_num.push(num);
     console.log("\n\n\n"+JSON.stringify(req.body));
   }
+
+  req.body.pins = [];
+  
+  for(let  i = 0; i < req.body.num_of_pins ; i++){
+    let pin = {
+      "pin_label":req.body.pin_label[i],
+      "pin_num":req.body.pin_num[i]
+    }
+    req.body.pins.push(pin);
+  }
+
+  // delete req.body.pin_label; 
+  delete req.body.pin_num;
+
 
   db.upsertEsp(req.body,(result)=>{
     console.log("SUCCESS: "+JSON.stringify(result));
@@ -182,7 +199,91 @@ router.post('/esp/modify',function(req,res){
 });
 
 router.post('/esp/configure',function(req,res){
-  console.log(JSON.stringify(req.body));
+  
+  console.log("Configure ESP JSON: "+JSON.stringify(req.body));
+  // Process the ESP request body before storing in the database.
+  /* Convert 
+  { 
+    "mac" : "60:01:94:5D:91:FD",
+    "model_type" : "ESP8266",
+    "num_of_pins" : "2",
+    "sampling_freq" : "200",
+
+    "epin" : [ "0", "2"],
+    "sensor_type" : [ "LED", "PUSH_BUTTON"],
+    "sensor_pin" : [ "POWER", "PIN"],
+    "pin_mode" : [ "OUTPUT", "INPUT"],
+    "misc_key" : [ "POWER", "CONTROL"],
+    "misc_val" : [ "1", "0"]
+  }
+  
+  TO
+
+  {
+    "mac":"60:01:94:5D:91:FD",
+    "model_type": "ESP8266",
+    "num_of_pins": "2",
+    "sampling_freq": "200",
+
+    "sensors": [{
+        "type": "LED",
+        "spins": [{
+            "epin": "0",
+            "sensor_pin": "POWER",
+            "pin_mode": "OUTPUT",
+            "misc_key": "POWER",
+            "misc_val": "1"
+        }]
+    }, {
+        "type": "PUSH_BUTTON",
+        "spins": [{
+            "epin": "2",
+            "sensor_pin": "PIN",
+            "pin_mode": "INPUT",
+            "misc_key": "CONTROL",
+            "misc_val": "0"
+        }]
+    }]
+  }
+
+  */ 
+
+  req.body.sensors = [];
+  let ssrPinMap = {};
+  for(var i = 0 ; i< req.body.sensor_type.length ; i++){
+    if(!ssrPinMap[req.body.sensor_type[i]]){
+      ssrPinMap[req.body.sensor_type[i]] = [];
+    }
+    let pin = { 
+      "epin"      : req.body.epin[i],
+      "sensor_pin": req.body.sensor_pin[i],
+      "pin_mode"  : req.body.pin_mode[i],
+      "misc_key"  : req.body.misc_key[i],
+      "misc_val"  : req.body.misc_val[i]
+    };
+
+    ssrPinMap[req.body.sensor_type[i]].push(pin);
+
+  }
+  
+  Object.keys(ssrPinMap).forEach(element => 
+    {
+      let ssr = { 
+        "type" : element,
+        "spins" : ssrPinMap[element] 
+      }
+      req.body.sensors.push(ssr);
+    });
+
+    delete req.body.epin;
+    delete req.body.sensor_type;
+    delete req.body.sensor_pin;
+    delete req.body.pin_mode;
+    delete req.body.misc_key;
+    delete req.body.misc_val;
+    
+    // console.log("\BODY:\n"+JSON.stringify(req.body));
+
   db.upsertConfiguration(req.body,(result)=>{
     wsserver.triggerEspEvent(req.body.mac,8);
     console.log("SUCCESS: "+JSON.stringify(result));

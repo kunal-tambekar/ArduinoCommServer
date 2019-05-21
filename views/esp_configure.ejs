@@ -19,8 +19,8 @@
       </div>
       <div class="mdl-card__supporting-text" style="width: 97%;">
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col">
-          <input class="mdl-textfield__input" type="text" value="<%= esp.name %>" pattern="-?^[a-zA-Z0-9_ ]*?"
-            id="name" readonly>
+          <input class="mdl-textfield__input" type="text" value="<%= esp.name %>" pattern="-?^[a-zA-Z0-9_ ]*?" id="name"
+            readonly>
           <label class="mdl-textfield__label" for="name">Name</label>
 
         </div>
@@ -37,30 +37,28 @@
 
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--2-col">
-          <input class="mdl-textfield__input" type="text" id="status" <% if(esp.status==0){ %>
-          value="UNCONFIGURED"
-          <% }else{ %> value= "CONFIGURED"
-          <%} %> readonly>
+          <input class="mdl-textfield__input" type="text" id="status" <% if(esp.status==0){ %> value="UNCONFIGURED"
+            <% }else{ %> value="CONFIGURED" <%} %> readonly>
           <label class="mdl-textfield__label" for="status">Status: </label>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--2-col">
-          <input class="mdl-textfield__input" type="text" value="<%= esp.ip %>" pattern="-?^[0-9.]*?"
-            readonly>
+          <input class="mdl-textfield__input" type="text" value="<%= esp.ip %>" pattern="-?^[0-9.]*?" readonly>
           <label class="mdl-textfield__label" for="ip">IP address</label>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--2-col">
-          <input class="mdl-textfield__input" type="text" value="<%= esp.num_of_pins %>" pattern="-?^[0-9]*?" name="num_of_pins"
-            id="num_of_pins" readonly>
+          <input class="mdl-textfield__input" type="text" value="<%= esp.num_of_pins %>" pattern="-?^[0-9]*?"
+            name="num_of_pins" id="num_of_pins" readonly>
           <label class="mdl-textfield__label" for="num_of_pins">Number of Pins:</label>
           <span class="mdl-textfield__error">Invalid Number!</span>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col-phone mdl-cell--8-col">
-          <input class="mdl-textfield__input" type="text" value="<%= esp.pin_label %>" id="pin_labels"
-            readonly>
+          <input class="mdl-textfield__input" type="text" value="<%= esp.pin_label %>" id="pin_labels" readonly>
           <label class="mdl-textfield__label" for="pin_labels">Pin Labels</label>
         </div>
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
-          <textarea class="mdl-textfield__input" type="text" id="description" rows=3 readonly><%= esp.description %></textarea>
+        <div
+          class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col-desktop mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+          <textarea class="mdl-textfield__input" type="text" id="description" rows=3
+            readonly><%= esp.description %></textarea>
           <label class="mdl-textfield__label" for="description">Description</label>
 
         </div>
@@ -75,117 +73,135 @@
         </br>
         <span style="top:4px; font-size:12px;color: var(--accent-green);">Configure pins below: </span>
         <div id="pins_layout" class="mdl-grid" style="justify-content: left;">
-          <% if(config) { config.pin_label.forEach(function(el, index) { %>
+          <% if(config) { config.sensors.forEach(function(el, index) { config.sensors[index].spins.forEach(function(spin,idx){ %> 
             <div class='mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--6-col-desktop border-rc m2'>
-              <div class='mdl-textfield mdl-js-textfield pin_labels mdl-cell--4-col-phone mdl-cell--6-col'>
-                <span style="top:4px; font-size:10px;"> Pin Label: </span>
-                <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='e.g.: SIGNAL'
-                  title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pin_label[index] %>"
-                  readonly>
-              </div>
-              <br>
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
-                <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a sensor: </span>
-                <select class="mdl-textfield__input" name='sensors' hint:"select a sensor from the list" data-required=true>
-                  <% for(let idx = 0; idx<sensors.length;idx++){ %>
-                  <option value="<%= sensors[idx].model_type %>" <% if(sensors[idx].model_type == config.sensors[index]){ %> selected <% }%></option> 
-                    <%= sensors[idx].model_type %>
-                  </option>
+                <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a ESP pin: </span>
+                <select class="mdl-textfield__input" name='epin' hint="select a sensor from the list" data-required=true>
+                  <% for(let j = 0; j < esp.pins.length; j++){ %>
+                    <option value="<%= esp.pins[j].pin_num %>" <% if(esp.pins[j].pin_num === spin.epin ){ %> selected <% }%> >
+                      <%= esp.pins[j].pin_label %>
+                    </option>
                   <%}%>
                 </select>
               </div>
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
-                  <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin: </span>
-                  <select class="mdl-textfield__input" name='sensor_pin' data-selected='<%= config.sensor_pin[index] %>' hint='select a pin mode from the list'>
-                    <option value="<%= config.sensor_pin[index] %>"><%= config.sensor_pin[index] %></option>
-                  </select>
+                <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a sensor: </span>
+                <select class="mdl-textfield__input" name='sensor_type' hint:"select a sensor from the list" data-required=true>
+                  <% for(let k = 0; k < sensors.length; k++){ %>
+                    <option value="<%= sensors[k].model_type %>" <% if(sensors[k].model_type == el.type ){ %>
+                      selected <% }%></option> <%= sensors[k].model_type %> </option>
+                  <%}%>
+                </select>
+              </div>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
+                <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin: </span>
+                <select class="mdl-textfield__input" name='sensor_pin' data-selected='<%= spin.sensor_pin %>' hint='select a pin mode from the list'>
+                  <option value="<%= spin.sensor_pin %>"><%= spin.sensor_pin %></option>
+                </select>
               </div>
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
                 <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin mode: </span>
-                <select class="mdl-textfield__input" name='pin_mode' hint='select a pin mode from the list' data-required=true>
-                  <option value="OUTPUT" <% if(config.pin_mode[index]=="OUTPUT"){ %> selected <% }%> >OUTPUT</option>
-                  <option value="INPUT" <% if(config.pin_mode[index]=="INPUT"){ %> selected <% }%>>INPUT</option>
-                  <option value="INPUT_PULLUP" <% if(config.pin_mode[index]=="INPUT_PULLUP"){ %> selected <% }%>>INPUT PULLUP</option>
+                <select class="mdl-textfield__input" name='pin_mode' hint='select a pin mode from the list'
+                    data-required=true>
+                  <option value="OUTPUT" <% if(spin.pin_mode=="OUTPUT"){ %> selected <% }%>>OUTPUT</option>
+                  <option value="INPUT" <% if(spin.pin_mode=="INPUT"){ %> selected <% }%>>INPUT</option>
+                  <option value="INPUT_PULLUP" <% if(spin.pin_mode=="INPUT_PULLUP"){ %> selected <% }%>>INPUT PULLUP</option>
                 </select>
               </div>
               <br><br>
               <span class="p8" style="top:4px; font-size:12px;"> ANY ADDITIONAL INFO: </span><br>
               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
-                  <input class="mdl-textfield__input" type="text" value="<%= config.misc_keys[index] %>"
-                  pattern="-?^[a-zA-Z0-9_]*?" name="misc_keys" id="misc_keys">
-                  <label class="mdl-textfield__label" for="misc_keys">Key:</label>
+                <input class="mdl-textfield__input" type="text" value="<%= spin.misc_key %>"
+                    pattern="-?^[a-zA-Z0-9_]*?" name="misc_key" id="misc_key">
+                <label class="mdl-textfield__label" for="misc_key">Key:</label>
+                <span class="mdl-textfield__error">Invalid value!</span>
+              </div>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+                <input class="mdl-textfield__input" type="text" value="<%= spin.misc_val %>"
+                    pattern="-?^[a-zA-Z0-9_]*?" name="misc_val" id="misc_val">
+                <label class="mdl-textfield__label" for="misc_val">Value:</label>
+                <span class="mdl-textfield__error">Invalid value!</span>
+              </div>
+            </div>
+          <% }); }); }else if(esp.num_of_pins>0) { esp.pins.forEach(function(el, index) { %>
+        <div class='mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--6-col-desktop border-rc m2'>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
+            <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a ESP pin: </span>
+            <select class="mdl-textfield__input" name='epin' hint="select a sensor from the list"
+              data-required=true>
+              <% for(let idx = 0; idx<esp.pins.length;idx++){ %>
+              <option value="<%= esp.pins[idx].pin_num %>">
+                <%= esp.pins[idx].pin_label %>
+              </option>
+              <%}%>
+            </select>
+          </div>
+
+              <!-- <div class='mdl-textfield mdl-js-textfield pin_labels mdl-cell--4-col-phone mdl-cell--6-col'>
+                <span style="top:4px; font-size:10px;"> Pin Label: </span>
+                <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='e.g.: SIGNAL'
+                  title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pins[index].pin_label %>"
+              readonly>
+              <input type='hidden' name='pin_num' value="<%= esp.pins[index].pin_num %>">
+          </div> 
+          <br>-->
+          <div
+            class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
+            <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a sensor: </span>
+            <select class="mdl-textfield__input" name='sensor_type' hint="select a sensor from the list" data-required=true>
+              <% for(let idx = 0; idx<sensors.length;idx++){ %>
+              <option value="<%= sensors[idx].model_type %>">
+                <%= sensors[idx].model_type %>
+              </option>
+              <%}%>
+                </select>
+              </div>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
+                  <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin: </span>
+                  <select  class="mdl-textfield__input" name='sensor_pin' hint:'select a pin mode from the list'>
+                    <option value="DEFAULT">DEFAULT</option>
+                  </select>
+              </div>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
+                <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin mode: </span>
+                <select class="mdl-textfield__input" name='pin_mode' hint:'select a pin mode from the list' data-required=true>
+                  <option value="OUTPUT" selected>OUTPUT</option>
+                  <option value="INPUT">INPUT</option>
+                  <option value="INPUT_PULLUP">INPUT PULLUP</option>
+                </select>
+              </div>
+              <br><br>
+              <span class="p8" style="top:4px; font-size:12px;"> Any additional info: </span><br>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
+                  <input class="mdl-textfield__input" type="text" pattern="-?^[a-zA-Z0-9_]*?" name="misc_key" id="misc_key">
+                  <label class="mdl-textfield__label" for="misc_key">Key:</label>
                   <span class="mdl-textfield__error">Invalid value!</span>
                 </div>
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
-                    <input class="mdl-textfield__input" type="text" value="<%= config.misc_val[index] %>" 
-                    pattern="-?^[a-zA-Z0-9_]*?" name="misc_val" id="misc_val">
+                    <input class="mdl-textfield__input" type="text" pattern="-?^[a-zA-Z0-9_]*?" name="misc_val" id="misc_val">
                     <label class="mdl-textfield__label" for="misc_val">Value:</label>
                     <span class="mdl-textfield__error">Invalid value!</span>
                   </div>
                 
             </div>
-
-          <%}); }else if(esp.num_of_pins>0) { esp.pin_label.forEach(function(el, index) { %>
-          <div class='mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--6-col-desktop border-rc m2'>
-            <div class='mdl-textfield mdl-js-textfield pin_labels mdl-cell--4-col-phone mdl-cell--6-col'>
-              <span style="top:4px; font-size:10px;"> Pin Label: </span>
-              <input class='mdl-textfield__input' type='text' pattern='-?^[a-zA-Z0-9_]*?' placeholder='e.g.: SIGNAL'
-                title="Use only characters, numbers or '_' !" name='pin_label' value="<%= esp.pin_label[index] %>"
-                readonly>
-            </div>
-            <br>
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
-              <span style="top:4px; font-size:10px;color: var(--accent-green);"> Select a sensor: </span>
-              <select class="mdl-textfield__input" name='sensors' hint="select a sensor from the list" data-required=true>
-                <% for(let idx = 0; idx<sensors.length;idx++){ %>
-                <option value="<%= sensors[idx].model_type %>">
-                  <%= sensors[idx].model_type %>
-                </option>
-                <%}%>
-              </select>
-            </div>
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
-                <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin: </span>
-                <select  class="mdl-textfield__input" name='sensor_pin' hint:'select a pin mode from the list'>
-                  <option value="DEFAULT">DEFAULT</option>
-                </select>
-            </div>
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label p4 mdl-cell--4-col mdl-cell--6-col-desktop">
-              <span style="top:4px; font-size:10px; color: var(--accent-green);"> Select pin mode: </span>
-              <select class="mdl-textfield__input" name='pin_mode' hint:'select a pin mode from the list' data-required=true>
-                <option value="OUTPUT" selected>OUTPUT</option>
-                <option value="INPUT">INPUT</option>
-                <option value="INPUT_PULLUP">INPUT PULLUP</option>
-              </select>
-            </div>
-            <br><br>
-            <span class="p8" style="top:4px; font-size:12px;"> Any additional info: </span><br>
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
-                <input class="mdl-textfield__input" type="text" <% if(config.misc_keys){ %> value="<%= config.misc_keys[index] %>" <%}%> 
-                pattern="-?^[a-zA-Z0-9_]*?" name="misc_keys" id="misc_keys">
-                <label class="mdl-textfield__label" for="misc_keys">Key:</label>
-                <span class="mdl-textfield__error">Invalid Number!</span>
-              </div>
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--4-col mdl-cell--6-col-desktop">
-                  <input class="mdl-textfield__input" type="text" <% if(config.misc_val){%> value="<%= config.misc_val[index] %>"  <%}%> 
-                  pattern="-?^[a-zA-Z0-9_]*?" name="misc_val" id="misc_val">
-                  <label class="mdl-textfield__label" for="misc_val">Value:</label>
-                  <span class="mdl-textfield__error">Invalid Number!</span>
-                </div>
-              
-          </div>
           <% }); }%>
 
+          </div>
+          <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--1-col-phone m4"
+            type="submit" value="SAVE">
+          <input id="btnInitOTA" data-mac="<%= esp.mac%>"
+            class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--3-col-phone m4"
+            type="button" style="background:var(--accent-blue); color:white;" value="Trigger OTA">
+          <input id="btnDiscard"
+            class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--2-col-phone"
+            style="background:tomato; margin:10px 10px 10px 4px; color: white;" type="button" value="Discard changes">
+
         </div>
-        <input class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--1-col-phone m4" type="submit" value="SAVE">
-        <input id="btnInitOTA" data-mac="<%= esp.mac%>" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--3-col-phone m4" type="button" style="background:var(--accent-blue); color:white;" value="Trigger OTA">
-        <input id="btnDiscard" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-cell--2-col-phone" style="background:tomato; margin:10px 10px 10px 4px; color: white;" type="button" value="Discard changes">
+      </div>
+      <div id="configuration_layout" class="mdl-grid">
 
       </div>
-    </div>
-    <div id="configuration_layout" class="mdl-grid">
-
-    </div>
   </form>
 
   <script src="../javascripts/esp_configure.js"></script>
