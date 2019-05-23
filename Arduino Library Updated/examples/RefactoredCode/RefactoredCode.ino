@@ -6,26 +6,36 @@
 #include "LED.h"
 #include "PushButton.h"
 
-SensorBase* SensorBase::head = nullptr;
-
 LED l;
 PushButton p;
 
-EspModuleBase esp;
+/* --v-- TO CONFIGURE BY USER --v-- */
+
+char *sid ="AndroidKT";
+char *pwd = "passpass";
+
+char *host= "192.168.43.82";
+char *url = "/";
+int port  = 3000;
+
+String otaHost = "192.168.43.82";
+String otaPort = "3001";
+
+String token = "5c50e740c332c60013c76948";
+
+/* --^-- TO CONFIGURE BY USER --^-- */
+
+EspModuleBase esp(token);
 
 void setup() {
-
-  char *sid ="AndroidKT";
-  char *pwd = "passpass";
+  
   esp.setWifiCredentials(sid,pwd);
-  esp.setServerConfig("192.168.43.82","/",3000);
-  esp.setOtaServerConfig("192.168.43.82","3001");
+  esp.setServerConfig(host,url,port);
+  esp.setOtaServerConfig(otaHost,otaPort);
   esp.setupESP();
-  esp.webSocket.onEvent(esp.webSocketEvent);
-
+  esp.webSocket.onEvent(webSocketEvent);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   esp.eloop();
 }

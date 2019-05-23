@@ -1,5 +1,5 @@
-#ifndef PUSHBUTTON_H
-#define PUSHBUTTON_H
+#ifndef __PUSHBUTTON_H__
+#define __PUSHBUTTON_H__
 
 #include "SensorBase.h"
 
@@ -18,20 +18,19 @@ public:
                 connectionPin = pins[i].esp_pin;
                 pinMode(connectionPin, pins[i].pin_mode); // INPUT ot INPUT_PULLUP
 
-                Serial.printf("PBtn ON on pin %d\n",connectionPin);
-
                 if(pins[i].misc_key=="CONTROL"){
                     controlPin = pins[i].misc_val.toInt();
-                    pinMode(controlPin, OUTPUT); // as pin can be controlled only in OUTPUT mode
-                    Serial.printf("PBtn Controls pin %d\n",controlPin);
+                    pinMode(controlPin, OUTPUT);
                 }
             }
         }
     }
 
-//        // these values will be extracted from this json and stored as
-//        // { 'pressed' : 1 } in the Mongo DB if pressed
-//        // { 'pressed' : 0 } in the Mongo DB when not pressed
+    /* In retrieveSensorData()
+       the values will be read and stored this json as
+         { "data": [ {"pressed" : 1} ]} in the Mongo DB if pressed
+         { "data": [ {"pressed" : 0} ]} in the Mongo DB when not pressed
+    */
 
     void retrieveSensorData(JsonObject& json) override{
 
@@ -73,4 +72,4 @@ protected:
 
 };
 
-#endif PUSHBUTTON_H
+#endif __PUSHBUTTON_H__

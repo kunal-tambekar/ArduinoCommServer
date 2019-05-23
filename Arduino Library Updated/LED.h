@@ -1,5 +1,5 @@
-#ifndef LED_H
-#define LED_H
+#ifndef __LED_H__
+#define __LED_H__
 
 #include "SensorBase.h"
 
@@ -13,18 +13,13 @@ public:
 
     void configureSensor(const PinConfig* pins) override {
 
-//        Serial.println("CONFIGURING... LED");
         for (int i = 0; i < numOfPins; i++) {
 
             if (pins[i].sensor_pin == "POWER") {
                 powerPin = pins[i].esp_pin;
                 pinMode(powerPin, OUTPUT); // or pins[i].pin_mode
 
-//                Serial.printf("LED on pin %d\n",powerPin);
-
                 if (pins[i].misc_key == "POWER") {
-//                    Serial.printf("LED POWER value = ");
-//                    Serial.println(pins[i].misc_val);
                     if (pins[i].misc_val == "0") {
                         setHigh();
                     } else {
@@ -61,5 +56,4 @@ protected:
     int powerPin;
 };
 
-
-#endif //LED_H
+#endif __LED_H__

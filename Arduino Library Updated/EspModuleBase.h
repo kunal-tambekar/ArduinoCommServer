@@ -31,7 +31,6 @@ class EspModuleBase {
 protected:
 
     ESP8266WiFiMulti WiFiMulti;
-    WebSocketsClient webSocket;
 
     char *host;
     char *url;
@@ -51,14 +50,14 @@ protected:
 
     int sampling_freq;
 
-// variables for timer
+    // variables for timer
     unsigned long startMillis;
     unsigned long currentMillis;
     ESPStatus estatus;
 
 public:
 
-
+    WebSocketsClient webSocket;
 
     void setWifiCredentials(char *wifiName, char *pwd) {
         this->ssid = wifiName;
@@ -77,112 +76,100 @@ public:
         this->otaPort = p;
     }
 
-    void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
+    void handleOTA(){
+        /* code for OTA Update */
+        estatus = STATE_INIT_OTA;
+        Serial.println("Will perform OTA NOW");
+        webSocket.disconnect();
+        delay(1000);
+        bootlite.update(WiFi.macAddress());
+    }
 
-        switch (type) {
-            case WStype_DISCONNECTED: {
-                Serial.printf(" Web Socket Disconnected!\n");
-            }
-                break;
-            case WStype_CONNECTED: {
-                Serial.printf("Connected to url: %s\n", payload);
-                // send message to server when Connected
-                String jsonStr = "{\"code\": 7 ,\"mac\":\"" + WiFi.macAddress() + "\"}";
-                webSocket.sendTXT(jsonStr);
-            }
-                break;
-                // on receiving message from server
-            case WStype_TEXT: {
-                // initial config to handle JSON data
-                const size_t jsonCapacity =
-                        3 * JSON_ARRAY_SIZE(2) + 2 * JSON_OBJECT_SIZE(2) + 3 * JSON_OBJECT_SIZE(5) + 260;
-                DynamicJsonBuffer jsonBuffer(jsonCapacity);
-                JsonObject &root = jsonBuffer.parseObject(payload);
+    void handleConfigResponse(uint8_t *payload){
+        const size_t jsonCapacity = 3 * JSON_ARRAY_SIZE(2) + 2 * JSON_OBJECT_SIZE(2) + 3 * JSON_OBJECT_SIZE(5) + 260;
+        DynamicJsonBuffer jsonBuffer(jsonCapacity);
+        JsonObject &root = jsonBuffer.parseObject(payload);
 
-                int state = root["state"];
+        int state = root["state"];
 
-                root.printTo(Serial);
-                Serial.printf("Parsing RESPONSE \n");
-                switch (state) {
-                    case STATE_RESPONSE_CONFIG: {
-                        /* code for setting ESP config */
-                        String str_sampling_freq = root["sampling_freq"];
-                        sampling_freq = str_sampling_freq.toInt();
+        root.printTo(Serial);
+        Serial.printf("Parsing RESPONSE \n");
+        switch (state) {
+            case STATE_RESPONSE_CONFIG: {
+                    /* code for setting ESP config */
+                    String str_sampling_freq = root["sampling_freq"];
+                    sampling_freq = str_sampling_freq.toInt();
 
-                        for (int s = 0; s < root["sensors"].size(); s++) {
+                    for (int s = 0; s < root["sensors"].size(); s++) {
 
-                            JsonArray &ja = root["sensors"][s]["spins"];
+                        JsonArray &ja = root["sensors"][s]["spins"];
 
-                            String type = root["sensors"][s]["type"];
-                            PinConfig pconf[ja.size()];
+                        String type = root["sensors"][s]["type"];
+                        PinConfig pconf[ja.size()];
 
-                            for (int i = 0; i < ja.size(); i++) {
-                                String strEpin = ja[i]["epin"];
-                                pconf[i].esp_pin = strEpin.toInt();
+                        for (int i = 0; i < ja.size(); i++) {
+                            String strEpin = ja[i]["epin"];
+                            pconf[i].esp_pin = strEpin.toInt();
 
-                                String sp = ja[i]["sensor_pin"];
-                                pconf[i].setSPin(sp);
+                            String sp = ja[i]["sensor_pin"];
+                            pconf[i].setSPin(sp);
 
-                                byte m;
-                                String pmode = ja[i]["pin_mode"];
-                                if (pmode == "OUTPUT") {
-                                    pconf[i].pin_mode = OUTPUT;
-                                } else if (pmode == "INPUT") {
-                                    pconf[i].pin_mode = INPUT;
-                                } else {
-                                    pconf[i].pin_mode = INPUT_PULLUP;
-                                }
-
-                                String mk = ja[i]["misc_key"];
-                                pconf[i].setMK(mk);
-
-                                String mv = ja[i]["misc_val"];
-                                pconf[i].setMV(mv);
+                            byte m;
+                            String pmode = ja[i]["pin_mode"];
+                            if (pmode == "OUTPUT") {
+                                pconf[i].pin_mode = OUTPUT;
+                            } else if (pmode == "INPUT") {
+                                pconf[i].pin_mode = INPUT;
+                            } else {
+                                pconf[i].pin_mode = INPUT_PULLUP;
                             }
 
-                            SensorBase::getSensorByType(type)->configureSensor(pconf);
+                            String mk = ja[i]["misc_key"];
+                            pconf[i].setMK(mk);
+
+                            String mv = ja[i]["misc_val"];
+                            pconf[i].setMV(mv);
                         }
-                        startMillis = millis();
-                        estatus = STATE_ACTIVE;
-                    }
-                        break;
 
-                    case STATE_OTA_AVAILABLE: {
-                        /* code for OTA Update */
-                        estatus = STATE_INIT_OTA;
-                        Serial.println("Will perform OTA NOW");
-                        webSocket.disconnect();
-                        delay(1000);
-                        bootlite.update(WiFi.macAddress());
+                        SensorBase::getSensorByType(type)->configureSensor(pconf);
                     }
-                        break;
-
-                    case STATE_DATA_ACK: {
-                        Serial.printf("ACK received\n");
-                    }
-                        break;
-
-                    default:// not reachable
-                    {
-                        Serial.printf("UNKNOWN state\n");
-                    }
-                        break;
+                    startMillis = millis();
+                    estatus = STATE_ACTIVE;
                 }
-                // Optional: send ACK to server to notify config received successfully
                 break;
-            }
+
+            case STATE_OTA_AVAILABLE: {
+                    handleOTA();
+                }
+                break;
+
+            case STATE_DATA_ACK: {
+                    Serial.printf("ACK received\n");
+                }
+                break;
+
+            default:{
+                    // not reachable
+                    Serial.printf("UNKNOWN/UNEXPECTED state\n");
+                }
+                break;
         }
     }
 
-    EspModuleBase(){
+    void connectAndRequestConfig(){
+        // send message to server when Connected
+        String jsonStr = "{\"code\": 7 ,\"mac\":\"" + WiFi.macAddress() + "\"}";
+        webSocket.sendTXT(jsonStr);
+    }
+
+
+    EspModuleBase(String tkn):bootlite("espdualmode", "someoneqwerty", RESET_WIFI_BUTTON_PIN){
         ssid_ap = "espdualmode";
         password_ap = "someoneqwerty";
-        token = "5c50e740c332c60013c76948";
-
-        ESP8266BootstrapLite bootlite(ssid_ap, password_ap, RESET_WIFI_BUTTON_PIN);
+        token = tkn;
 
         estatus = STATE_BOOTING;
-        sampling_freq = 60;
+        sampling_freq = 50;
     }
 
     ~EspModuleBase(){ }
@@ -195,31 +182,25 @@ public:
         Serial.println("IN SETUP");
         Serial.println(WiFi.macAddress());
 
-
-
         WiFiMulti.addAP(ssid, password);
 
         while (WiFiMulti.run() != WL_CONNECTED) {
             delay(100);
         }
+        Serial.println("Wifi connected");
 
         bootlite.enableOTAUpdates(otaHost, otaPort, token);
+//        bool success = bootLite.begin(); // not using bootlite for Wifi
 
-        //  bool success = bootLite.begin();
-        Serial.println("Wifi connected");
         webSocket.begin(host, port, url);  // server address, port and URL
-        webSocket.onEvent(webSocketEvent); // event handler
 
         // try again in 5 sec if connection failed
         webSocket.setReconnectInterval(5000);
-
-
-
         startMillis = millis();  //get the current "time"
     }
 
     void eloop() {
-        //  ESPBootstrapError err =  bootLite.bootstrap();
+//        ESPBootstrapError err =  bootLite.bootstrap();
 
         if (WiFi.status() == WL_CONNECTED) {
 
@@ -229,9 +210,8 @@ public:
             else
                 webSocket.disconnect();
 
-            if (estatus) {
+            if (estatus!=STATE_BOOTING) {
                 currentMillis = millis();  //get the current "time"
-
                 if (currentMillis - startMillis >= sampling_freq * 100) {
 
                     const size_t capacity = 2 * JSON_OBJECT_SIZE(3);
@@ -247,9 +227,7 @@ public:
                         DynamicJsonBuffer jsonBuffer(cap);
                         JsonObject &json = jsonBuffer.createObject();
 
-                        Serial.println(itr->getType());
                         itr->retrieveSensorData(json);
-
                         JsonArray &rt = json["data"];
 
                         JsonObject &data = root.createNestedObject("data");
@@ -263,6 +241,7 @@ public:
                         root.printTo(jsonresp);
                         webSocket.sendTXT(jsonresp);
                         delay(100);
+                        itr = itr->getNext();
                     }
                     startMillis = currentMillis;  //IMPORTANT to update the start time of the moment recording was done.
                 }

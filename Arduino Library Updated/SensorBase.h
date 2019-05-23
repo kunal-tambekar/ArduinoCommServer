@@ -14,6 +14,10 @@ class SensorBase {
     public:
         static SensorBase* head;
 
+        SensorBase* getNext(){
+            return next;
+        }
+
         SensorBase(){
             next = head;
             head = this;
@@ -34,6 +38,7 @@ class SensorBase {
                 if(itr->type==t){
                     return itr;
                 }
+                itr = itr->next;
             }
 
             return nullptr;

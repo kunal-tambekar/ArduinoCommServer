@@ -116,7 +116,7 @@ exports.initWebSocketServer = function (server) {
                   "ip":ip,
                   "status":0,
                   "name":"ESP_"+msg.mac,
-                  "description":"Newly added unconfigured ESP",
+                  "description":"Newly added unconfigured ESP8266 with MAC address: "+msg.mac,
                   "model_type":"ESP8266",
                   "num_of_pins":2,
                   "pins" : [
