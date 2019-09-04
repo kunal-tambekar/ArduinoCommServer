@@ -1,5 +1,5 @@
 # Arduino Communication Server
-A simple and easy to use solution to deploy, manage and do OTA upadates for any WiFi enabled Arduino based chip. This framework allows developers to get started with ESP8266 devices for personal and professional use.
+A simple and easy to use solution to deploy, manage and do OTA updates for any WiFi-enabled Arduino based chip. This framework allows developers to get started with ESP8266 devices for personal and professional use.
 
 ## Your DIY IoT solution for Arduino based wifi enabled microcontrollers
 For any IoT enthusiasts who wants to set up any IoT device with sensors and monitor the data collected through it; this project can be your go to solution. With an intuitive and user-friendle user interface it makes things easy for user to set up, update, modify and monitor the various IoT modules deployed in the field with very little effort.
